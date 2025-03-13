@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:latest
+    container_name: my_database
+    environment:
+      POSTGRES_DB: sirius_java_bd
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - postgres_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: kam@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 123
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      - postgres_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sirius_java_project_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - postgres_network
+
+networks:
+  postgres_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

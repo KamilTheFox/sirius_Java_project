@@ -2,30 +2,38 @@ package ru.hpclab.hl.module1.service;
 
 import org.springframework.stereotype.*;
 import ru.hpclab.hl.module1.model.*;
+import ru.hpclab.hl.module1.repository.OrderRepository;
 
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 @Service
 public class OrderService
 {
-    private final List<Order> orders = new ArrayList<>();
+    private final OrderRepository orders;
 
-    public Order createOrder(UUID identifier,Restaurant restaurant, List<Dish> dishes,
-                             String address, LocalDateTime time) {
+    public OrderService(OrderRepository orders) {
+        this.orders = orders;
+    }
+
+    public Order createOrder(Restaurant restaurant,
+                             List<Dish> dishes,
+                             String address)
+    {
         // Проверка минимальной суммы заказа
         double orderSum = calculateOrderSum(dishes);
+
         if (orderSum < restaurant.getMinimumOrder()) {
             throw new IllegalArgumentException(
                     "Сумма заказа меньше минимальной! Минимум: " +
                             restaurant.getMinimumOrder()
             );
         }
-
-        Order order = new Order(identifier,restaurant, dishes, address, time);
+        List<UUID> dishIDs = dishes.stream().map(Dish::getIdentifier).toList();
+        Order order = new Order(restaurant.getIdentifier(), dishIDs, address, orderSum);
         order.setTotalAmount(orderSum);
-        orders.add(order);
+        orders.save(order);
         return order;
     }
 
@@ -36,21 +44,16 @@ public class OrderService
     }
 
     public List<Order> getAllOrders() {
-        return new ArrayList<>(orders);
+        return orders.findAll();
     }
 
     public List<Order> getRestaurantOrders(Restaurant restaurant) {
-        return orders.stream()
-                .filter(o -> o.getRestaurant().equals(restaurant))
-                .collect(Collectors.toList());
+        return orders.findByRestaurant(restaurant);
     }
 
     public List<Order> getRestaurantMonthlyOrders(Restaurant restaurant) {
         LocalDateTime monthAgo = LocalDateTime.now().minusMonths(1);
-        return orders.stream()
-                .filter(o -> o.getRestaurant().equals(restaurant))
-                .filter(o -> o.getDeliveryTime().isAfter(monthAgo))
-                .collect(Collectors.toList());
+        return orders.findByRestaurantAndDeliveryTimeAfter(restaurant, monthAgo);
     }
 
     public double calculateAverageCheck(Restaurant restaurant) {

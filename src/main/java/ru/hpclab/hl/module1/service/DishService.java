@@ -3,33 +3,34 @@ package ru.hpclab.hl.module1.service;
 import org.springframework.stereotype.*;
 import ru.hpclab.hl.module1.model.Dish;
 import ru.hpclab.hl.module1.model.Restaurant;
+import ru.hpclab.hl.module1.repository.DishRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class DishService {
-    private final List<Dish> dishes = new ArrayList<>();
+
+    private final DishRepository dishes;
+
+    public DishService(DishRepository dishes) {
+        this.dishes = dishes;
+    }
 
     public Dish addDish(Dish dish) {
-        dishes.add(dish);
+        dishes.save(dish);
         return dish;
     }
 
     public List<Dish> getAllDishes() {
-        return new ArrayList<>(dishes);
+        return dishes.findAll();
     }
 
     public Dish getDishById(UUID id) {
-        return dishes.stream()
-                .filter(d -> d.getIdentifier().equals(id))
-                .findFirst()
-                .orElse(null);
+        return dishes.getReferenceById(id);
     }
 
     public List<Dish> getDishesByRestaurant(Restaurant restaurant) {
-        return dishes.stream()
-                .filter(d -> d.getRestaurant().equals(restaurant))
-                .collect(Collectors.toList());
+        return dishes.findByRestaurant(restaurant);
     }
 }

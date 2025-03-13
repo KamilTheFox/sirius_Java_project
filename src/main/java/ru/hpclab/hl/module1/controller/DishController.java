@@ -2,6 +2,7 @@ package ru.hpclab.hl.module1.controller;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import ru.hpclab.hl.module1.dto.DishCreateDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.service.*;
 
@@ -12,14 +13,23 @@ import java.util.UUID;
 @RequestMapping("/dishes")
 public class DishController {
     private final DishService dishService;
+    private final RestaurantService restaurantService;
 
-    public DishController(DishService dishService) {
+    public DishController(DishService dishService, RestaurantService restaurantService) {
         this.dishService = dishService;
+        this.restaurantService = restaurantService;
     }
 
     @PostMapping
-    public ResponseEntity<Dish> addDish(@RequestBody Dish dish) {
-        return ResponseEntity.ok(dishService.addDish(dish));
+    public ResponseEntity<Dish> addDish(@RequestBody DishCreateDTO dish) {
+        return ResponseEntity.ok(
+                dishService.addDish(
+                        new Dish(
+                                dish.getName(),
+                                dish.getPrice(),
+                                dish.getWeight(),
+                                dish.getRestaurantId())
+                ));
     }
 
     @GetMapping
@@ -35,7 +45,7 @@ public class DishController {
 
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<Dish>> getDishesByRestaurant(@PathVariable UUID restaurantId) {
-        Restaurant restaurant = new Restaurant(); // Здесь нужно получить ресторан
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(dishService.getDishesByRestaurant(restaurant));
     }
 }

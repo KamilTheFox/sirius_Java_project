@@ -23,7 +23,8 @@ public class RestaurantController
     }
 
     @GetMapping
-    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+    public ResponseEntity<List<Restaurant>> getAllRestaurants()
+    {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
 
