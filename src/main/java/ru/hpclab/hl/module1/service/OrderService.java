@@ -8,7 +8,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderService {
+public class OrderService
+{
     private final List<Order> orders = new ArrayList<>();
 
     public Order createOrder(UUID identifier,Restaurant restaurant, List<Dish> dishes,

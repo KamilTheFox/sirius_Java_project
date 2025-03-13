@@ -7,10 +7,10 @@ import ru.hpclab.hl.module1.service.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/restaurants")
-public class RestaurantController {
+public class RestaurantController
+{
     private final RestaurantService restaurantService;
 
     public RestaurantController(RestaurantService restaurantService) {

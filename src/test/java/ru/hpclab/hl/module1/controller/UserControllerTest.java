@@ -12,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.hpclab.hl.module1.Application;
-import ru.hpclab.hl.module1.model.User;
-import ru.hpclab.hl.module1.repository.UserRepository;
 
 
 import java.util.UUID;

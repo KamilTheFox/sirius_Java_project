@@ -6,7 +6,8 @@ import ru.hpclab.hl.module1.model.Restaurant;
 import java.util.*;
 
 @Service
-public class RestaurantService {
+public class RestaurantService
+{
     private final List<Restaurant> restaurants = new ArrayList<>();
 
     public Restaurant addRestaurant(Restaurant restaurant) {
@@ -22,6 +23,10 @@ public class RestaurantService {
         return restaurants.stream()
                 .filter(r -> r.getName().equals(name))
                 .findFirst()
+                .orElse(null);
+    }
+    public Restaurant getRestaurantByUUID(UUID id) {
+        return restaurants.stream().filter(r -> r.getIdentifier().equals(id)).findFirst()
                 .orElse(null);
     }
 }

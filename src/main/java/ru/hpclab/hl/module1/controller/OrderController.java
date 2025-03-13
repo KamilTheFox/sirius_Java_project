@@ -14,9 +14,11 @@ import java.util.UUID;
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final RestaurantService restaurantService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, RestaurantService restaurantService) {
         this.orderService = orderService;
+        this.restaurantService = restaurantService;
     }
 
     @PostMapping
@@ -42,13 +44,13 @@ public class OrderController {
 
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<Order>> getRestaurantOrders(@PathVariable UUID restaurantId) {
-        Restaurant restaurant = new Restaurant(); // Здесь нужно получить ресторан
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(orderService.getRestaurantOrders(restaurant));
     }
 
     @GetMapping("/restaurant/{restaurantId}/average-check")
     public ResponseEntity<Double> getAverageCheck(@PathVariable UUID restaurantId) {
-        Restaurant restaurant = new Restaurant(); // Здесь нужно получить ресторан
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(orderService.calculateAverageCheck(restaurant));
     }
 }
