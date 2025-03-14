@@ -22,4 +22,4 @@ COPY --from=0 /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 # Запускаем приложение
-ENTRYPOINT ["java", "-Ddebug=true", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
