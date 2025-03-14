@@ -1,25 +1,34 @@
-FROM gradle:latest
+FROM gradle:latest AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файл сборки и исходный код
-COPY build.gradle .
-COPY gradlew .
+# Копируем сначала только файлы для зависимостей
+COPY settings.gradle build.gradle ./
 COPY gradle gradle
-COPY src src
+COPY gradlew ./
 
-# Собираем проект
-RUN gradle build -x test --no-daemon
+# Загружаем зависимости отдельно (это улучшит кэширование)
+RUN gradle dependencies --no-daemon
+
+# Теперь копируем исходный код
+COPY src src
 
 # Собираем проект
 RUN gradle build -x test --no-daemon --warning-mode all
 
-# Второй этап - только для запуска
+# Второй этап
 FROM openjdk:21-jdk-slim
+
 WORKDIR /app
-COPY --from=0 /app/build/libs/*.jar app.jar
+
+# Копируем jar из первого этапа
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Добавляем wait-for-it скрипт
+ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
 
 EXPOSE 8080
-# Запускаем приложение
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Используем wait-for-it для ожидания готовности базы данных
+ENTRYPOINT ["/wait-for-it.sh", "database:5432", "--timeout=30", "--strict", "--", "java", "-jar", "app.jar"]
