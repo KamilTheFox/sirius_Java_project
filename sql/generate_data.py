@@ -116,12 +116,14 @@ def generate_sql():
         delivery_time = datetime.now() + timedelta(hours=random.randint(1, 24))
         address = random.choice(addresses)
 
+        dishes_array = '{"' + '","'.join(selected_dishes) + '"}'
+
         sql += f"""
         INSERT INTO orders (identifier, restaurant, dishes, delivery_address, delivery_time, total_amount)
         VALUES (
             '{order_id}',
             '{restaurant[0]}',
-            ARRAY['{",".join(selected_dishes)}']::uuid[],
+            '{dishes_array}'::uuid[],
             '{address}',
             '{delivery_time}',
             {total_amount}

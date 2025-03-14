@@ -31,4 +31,4 @@ RUN chmod +x /wait-for-it.sh
 EXPOSE 8080
 
 # Используем wait-for-it для ожидания готовности базы данных
-ENTRYPOINT ["/wait-for-it.sh", "database:5432", "--timeout=30", "--strict", "--", "java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

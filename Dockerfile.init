@@ -1,0 +1,10 @@
+FROM python:3.9-slim
+
+# Установка postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
+# Копируем скрипты
+COPY ./sql /sql
+
+# Устанавливаем рабочую директорию
+WORKDIR /sql
