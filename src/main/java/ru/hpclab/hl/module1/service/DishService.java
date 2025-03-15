@@ -6,7 +6,6 @@ import ru.hpclab.hl.module1.model.Restaurant;
 import ru.hpclab.hl.module1.repository.DishRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DishService {
@@ -32,5 +31,10 @@ public class DishService {
 
     public List<Dish> getDishesByRestaurant(Restaurant restaurant) {
         return dishes.findByRestaurant(restaurant);
+    }
+
+    public List<Dish> getDishesByIds(List<UUID> dishes)
+    {
+        return this.dishes.findAllById(dishes);
     }
 }

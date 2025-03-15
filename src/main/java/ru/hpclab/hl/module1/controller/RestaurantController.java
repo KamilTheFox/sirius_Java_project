@@ -2,6 +2,7 @@ package ru.hpclab.hl.module1.controller;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import ru.hpclab.hl.module1.dto.RestaurantCreateDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.service.*;
 
@@ -18,8 +19,12 @@ public class RestaurantController
     }
 
     @PostMapping
-    public ResponseEntity<Restaurant> addRestaurant(@RequestBody Restaurant restaurant) {
-        return ResponseEntity.ok(restaurantService.addRestaurant(restaurant));
+    public ResponseEntity<Restaurant> addRestaurant(@RequestBody RestaurantCreateDTO restaurant) {
+        return ResponseEntity.ok(restaurantService.addRestaurant(
+                new Restaurant(
+                        restaurant.getName(),
+                        restaurant.getCuisine(),
+                        restaurant.getMinimumOrder())));
     }
 
     @GetMapping

@@ -32,5 +32,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             @Param("restaurant") Restaurant restaurant,
             @Param("monthAgo") LocalDateTime monthAgo
     );
+
 }
 

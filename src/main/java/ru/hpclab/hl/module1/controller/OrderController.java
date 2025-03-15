@@ -2,6 +2,7 @@ package ru.hpclab.hl.module1.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hpclab.hl.module1.dto.OrderCreateDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.service.*;
 
@@ -24,9 +25,13 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order request) {
+    public ResponseEntity<Order> createOrder(@RequestBody OrderCreateDTO request) {
         try {
-            return ResponseEntity.ok(request);
+            Order curOrder = orderService.createOrder(
+                    restaurantService.getRestaurantByUUID(request.getRestaurant()),
+                    dishService.getDishesByIds(request.getDishes())
+                    ,request.getDeliveryAddress());
+            return ResponseEntity.ok(curOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -42,13 +47,6 @@ public class OrderController {
     public ResponseEntity<List<Order>> getRestaurantOrders(@PathVariable UUID restaurantId) {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(orderService.getRestaurantOrders(restaurant));
-    }
-
-    public List<Dish> getDishesByIds(List<UUID> dishIds)
-    {
-        return dishIds.stream()
-                .map(dishService::getDishById)
-                .collect(Collectors.toList());
     }
 
     @GetMapping("/restaurant/{restaurantId}/average-check")
