@@ -6,7 +6,6 @@ import ru.hpclab.hl.module1.repository.OrderRepository;
 
 import java.time.*;
 import java.util.*;
-import java.util.stream.*;
 
 @Service
 public class OrderService
@@ -30,7 +29,7 @@ public class OrderService
                             restaurant.getMinimumOrder()
             );
         }
-        List<UUID> dishIDs = dishes.stream().map(Dish::getIdentifier).toList();
+        List<UUID> dishIDs = dishes.stream().map(Dish::getId).toList();
         Order order = new Order(restaurant.getIdentifier(), dishIDs, address, orderSum);
         order.setTotalAmount(orderSum);
         orders.save(order);

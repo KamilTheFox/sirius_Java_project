@@ -2,7 +2,6 @@ package ru.hpclab.hl.module1.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,7 @@ import lombok.Setter;
 @Getter
 public class Dish {
     @Id
-    private UUID identifier;
+    private UUID id;
     @Column
     private String name;
     @Column
@@ -23,14 +22,11 @@ public class Dish {
     private UUID restaurant;
 
     public Dish(String name, double price, double weight, UUID restaurant) {
-        this.identifier = UUID.randomUUID();
+        this.id = UUID.randomUUID();
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.restaurant = restaurant;
-    }
-
-    public Dish() {
     }
 
 }
