@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 public class Dish {
     @Id
-    private UUID id;
+    private UUID identifier;
     @Column
     private String name;
     @Column
@@ -22,11 +22,16 @@ public class Dish {
     private UUID restaurant;
 
     public Dish(String name, double price, double weight, UUID restaurant) {
-        this.id = UUID.randomUUID();
+        this.identifier = UUID.randomUUID();
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.restaurant = restaurant;
+    }
+
+    public Dish()
+    {
+
     }
 
 }

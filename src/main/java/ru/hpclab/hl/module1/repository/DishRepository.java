@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface DishRepository extends JpaRepository<Dish, UUID>
 {
     List<Dish> findByRestaurant(Restaurant restaurant);
-    List<Dish> findAllByIdIn(List<UUID> ids);
+    List<Dish> findAllByIdentifierIn(List<UUID> identifiers);
 }

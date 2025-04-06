@@ -29,7 +29,7 @@ public class OrderService
                             restaurant.getMinimumOrder()
             );
         }
-        List<UUID> dishIDs = dishes.stream().map(Dish::getId).toList();
+        List<UUID> dishIDs = dishes.stream().map(Dish::getIdentifier).toList();
         Order order = new Order(restaurant.getIdentifier(), dishIDs, address, orderSum);
         order.setTotalAmount(orderSum);
         orders.save(order);
