@@ -62,8 +62,6 @@ services:
     container_name: sirius_java_project_app
     ports:
       - "8080:8080"
-    depends_on:
-      - init-db
     networks:
       - postgres_network
 
