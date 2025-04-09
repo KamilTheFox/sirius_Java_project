@@ -47,11 +47,7 @@ public class DishController {
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<Dish>> getDishesByRestaurant(@PathVariable UUID restaurantId) 
     {
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
-        if (restaurant == null) {
-            return ResponseEntity.notFound().build();
-        }
-        List<Dish> dishes = dishService.getDishesByRestaurant(restaurant);
+        List<Dish> dishes = dishService.getDishesByRestaurant(restaurantId);
         return ResponseEntity.ok(dishes != null ? dishes : Collections.emptyList());
     }
     @DeleteMapping("/clear")

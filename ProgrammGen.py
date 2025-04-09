@@ -22,9 +22,12 @@ RESTAURANT_NAMES = [
 class DataGenerator:
     def __init__(self, base_url):
         self.base_url = base_url
+        self.restaurants_cache = None
+        self.dishes_cache = {}
 
     def clear_data(self, endpoint):
         response = requests.delete(f"{self.base_url}/{endpoint}/clear")
+        print(f"{self.base_url}/{endpoint}/clear")
         print(f"Cleared {endpoint} data. Status: {response.status_code}")
 
     def create_restaurant(self):
@@ -56,7 +59,37 @@ class DataGenerator:
             print(f"Ошибка при создании блюда: {e}")
             return None
 
-    def create_order(self, restaurant_id, dish_ids):
+    def get_all_restaurants(self):
+        if self.restaurants_cache is None:
+            try:
+                response = requests.get(f"{self.base_url}/restaurants")
+                response.raise_for_status()
+                self.restaurants_cache = response.json()
+            except requests.exceptions.RequestException as e:
+                print(f"Ошибка при получении списка ресторанов: {e}")
+                return []
+        return self.restaurants_cache
+
+    def get_restaurant_dishes(self, restaurant_id):
+        if restaurant_id not in self.dishes_cache:
+            try:
+                response = requests.get(f"{self.base_url}/dishes/restaurant/{restaurant_id}")
+                response.raise_for_status()
+                self.dishes_cache[restaurant_id] = response.json()
+            except requests.exceptions.RequestException as e:
+                print(f"Ошибка при получении блюд ресторана {restaurant_id}: {e}")
+                return []
+        return self.dishes_cache[restaurant_id]
+    
+
+    def create_order(self, restaurant_id):
+        restaurant_dishes = self.get_restaurant_dishes(restaurant_id)
+        if not restaurant_dishes:
+            print(f"Нет доступных блюд для ресторана {restaurant_id}")
+            return None
+
+        dish_ids = [dish['identifier'] for dish in restaurant_dishes]
+        
         data = {
             "restaurant": restaurant_id,
             "dishes": random.sample(dish_ids, random.randint(1, min(5, len(dish_ids)))),
@@ -98,33 +131,32 @@ def main():
             generator.create_restaurant()
 
     elif args.endpoint == "dishes":
-        restaurants = [r for r in [generator.create_restaurant() for _ in range(10)] if r is not None]
-        restaurant_ids = [rest.get('identifier') for rest in restaurants if rest.get('identifier')]
-
-        if not restaurant_ids:
-            print("Не удалось создать рестораны")
+        # Получаем существующие рестораны
+        restaurants = generator.get_all_restaurants()
+        if not restaurants:
+            print("Не найдено ресторанов в системе")
             return
 
+        restaurant_ids = [rest['identifier'] for rest in restaurants]
+        
+        # Создаем блюда для случайных ресторанов
         for _ in range(args.count):
-            generator.create_dish(random.choice(restaurant_ids))
+            restaurant_id = random.choice(restaurant_ids)
+            generator.create_dish(restaurant_id)
 
     elif args.endpoint == "orders":
-        restaurants = [r for r in [generator.create_restaurant() for _ in range(5)] if r is not None]
-        restaurant_ids = [rest.get('identifier') for rest in restaurants if rest.get('identifier')]
-
-        if not restaurant_ids:
-            print("Не удалось создать рестораны")
+        restaurants = generator.get_all_restaurants()
+        if not restaurants:
+            print("Не найдено ресторанов в системе")
             return
 
-        dishes_by_restaurant = {}
-        for rest_id in restaurant_ids:
-            dishes = [d for d in [generator.create_dish(rest_id) for _ in range(10)] if d is not None]
-            dishes_by_restaurant[rest_id] = [dish.get('identifier') for dish in dishes if dish.get('identifier')]
-
+        restaurant_ids = [rest['identifier'] for rest in restaurants]
+        
         for _ in range(args.count):
             rest_id = random.choice(restaurant_ids)
-            if dishes_by_restaurant[rest_id]:
-                generator.create_order(rest_id, dishes_by_restaurant[rest_id])
+            generator.create_order(rest_id)
+
 
 if __name__ == "__main__":
     main()
+

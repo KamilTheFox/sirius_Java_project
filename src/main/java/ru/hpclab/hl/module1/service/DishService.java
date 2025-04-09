@@ -29,7 +29,7 @@ public class DishService {
         return dishes.getReferenceById(id);
     }
 
-    public List<Dish> getDishesByRestaurant(Restaurant restaurant) {
+    public List<Dish> getDishesByRestaurant(UUID restaurant) {
         return dishes.findByRestaurant(restaurant);
     }
 
