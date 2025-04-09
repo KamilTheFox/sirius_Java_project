@@ -8,6 +8,7 @@ import ru.hpclab.hl.module1.service.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/dishes")
