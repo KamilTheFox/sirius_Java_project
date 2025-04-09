@@ -55,4 +55,9 @@ public class OrderController {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(orderService.calculateAverageCheck(restaurant));
     }
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearAll() {
+        orderService.clearAll();
+        return ResponseEntity.ok().build();
+    }
 }

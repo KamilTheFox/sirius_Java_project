@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d sirius_java_bd"]
       interval: 5s
@@ -21,25 +22,25 @@ services:
     networks:
       - postgres_network
 
-  init-db:
-    build:
-      context: .
-      dockerfile: Dockerfile.init
-    container_name: init_db
-    depends_on:
-      database:
-        condition: service_healthy
-    environment:
-      POSTGRES_DB: sirius_java_bd
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: 123
-      POSTGRES_HOST: database
-      PGPASSWORD: 123  # Передаём пароль для psq
-    command: >
-      sh -c "python3 /sql/generate_data.py &&
-             psql -h database -U user -d sirius_java_bd -f /sql/init.sql"
-    networks:
-      - postgres_network
+#  init-db:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.init
+#    container_name: init_db
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#    environment:
+#      POSTGRES_DB: sirius_java_bd
+#      POSTGRES_USER: user
+#      POSTGRES_PASSWORD: 123
+#      POSTGRES_HOST: database
+#      PGPASSWORD: 123  # Передаём пароль для psq
+#    command: >
+#      sh -c "python3 /sql/generate_data.py &&
+#             psql -h database -U user -d sirius_java_bd -f /sql/init.sql"
+#    networks:
+#      - postgres_network
 
   pgadmin:
     image: dpage/pgadmin4

@@ -48,4 +48,9 @@ public class DishController {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         return ResponseEntity.ok(dishService.getDishesByRestaurant(restaurant));
     }
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearAll() {
+        dishService.clearAll();
+        return ResponseEntity.ok().build();
+    }
 }

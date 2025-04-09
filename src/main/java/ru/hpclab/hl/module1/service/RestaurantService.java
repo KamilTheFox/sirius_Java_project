@@ -30,4 +30,7 @@ public class RestaurantService
     public Restaurant getRestaurantByUUID(UUID id) {
         return restaurants.getReferenceById(id);
     }
+    public void clearAll() {
+        restaurants.deleteAll();
+    }
 }

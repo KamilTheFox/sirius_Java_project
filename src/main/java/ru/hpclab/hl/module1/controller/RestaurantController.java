@@ -38,4 +38,9 @@ public class RestaurantController
         Restaurant restaurant = restaurantService.getRestaurantByName(name);
         return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
     }
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearAll() {
+        restaurantService.clearAll();
+        return ResponseEntity.ok().build();
+    }
 }

@@ -37,4 +37,8 @@ public class DishService {
     {
         return this.dishes.findAllById(dishes);
     }
+
+    public void clearAll() {
+        dishes.deleteAll();
+    }
 }
