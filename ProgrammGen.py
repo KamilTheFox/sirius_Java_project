@@ -4,7 +4,20 @@ from faker import Faker
 import uuid
 import random
 
-fake = Faker()
+fake = Faker('ru_RU')
+
+# Списки данных для генерации
+FOOD_ITEMS = [
+    "Карбонара", "Цезарь", "Борщ", "Суши Филадельфия", "Пицца Маргарита",
+    "Греческий салат", "Лазанья", "Том Ям", "Пельмени", "Стейк Рибай",
+    "Паста Болоньезе", "Оливье", "Роллы Калифорния", "Тирамису", "Рамен"
+]
+
+RESTAURANT_NAMES = [
+    "Вкусная История", "Старый Город", "У Моря", "Золотой Дракон",
+    "Итальянский Дворик", "Пармезан", "Сакура", "Русский Двор",
+    "Французское Кафе", "Восточный Экспресс"
+]
 
 class DataGenerator:
     def __init__(self, base_url):
@@ -16,31 +29,46 @@ class DataGenerator:
 
     def create_restaurant(self):
         data = {
-            "name": fake.company(),
+            "name": random.choice(RESTAURANT_NAMES) + " " + fake.company_suffix(),
             "cuisine": random.choice(["Итальянская", "Японская", "Русская", "Французская"]),
             "minimumOrder": round(random.uniform(500, 2000), 2)
         }
-        response = requests.post(f"{self.base_url}/restaurants", json=data)
-        return response.json()
+        try:
+            response = requests.post(f"{self.base_url}/restaurants", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Ошибка при создании ресторана: {e}")
+            return None
 
     def create_dish(self, restaurant_id):
         data = {
-            "name": fake.food(),
+            "name": random.choice(FOOD_ITEMS),
             "price": round(random.uniform(100, 1000), 2),
             "weight": round(random.uniform(100, 1000), 2),
             "restaurantId": restaurant_id
         }
-        response = requests.post(f"{self.base_url}/dishes", json=data)
-        return response.json()
+        try:
+            response = requests.post(f"{self.base_url}/dishes", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Ошибка при создании блюда: {e}")
+            return None
 
     def create_order(self, restaurant_id, dish_ids):
         data = {
             "restaurant": restaurant_id,
             "dishes": random.sample(dish_ids, random.randint(1, min(5, len(dish_ids)))),
-            "deliveryAddress": fake.address()
+            "deliveryAddress": f"{fake.street_address()}, {fake.city()}"
         }
-        response = requests.post(f"{self.base_url}/orders", json=data)
-        return response.json()
+        try:
+            response = requests.post(f"{self.base_url}/orders", json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Ошибка при создании заказа: {e}")
+            return None
 
 def main():
     parser = argparse.ArgumentParser(description='Generate test data for REST API')
@@ -58,12 +86,10 @@ def main():
 
     generator = DataGenerator(args.base_url)
 
-    # Если указан флаг --delete, только очищаем данные и завершаем работу
     if args.delete:
         generator.clear_data(args.endpoint)
         return
 
-    # Очищаем данные если указан флаг --clear
     if args.clear:
         generator.clear_data(args.endpoint)
 
@@ -72,24 +98,33 @@ def main():
             generator.create_restaurant()
 
     elif args.endpoint == "dishes":
-        restaurants = [generator.create_restaurant() for _ in range(10)]
-        restaurant_ids = [rest['id'] for rest in restaurants]
+        restaurants = [r for r in [generator.create_restaurant() for _ in range(10)] if r is not None]
+        restaurant_ids = [rest.get('identifier') for rest in restaurants if rest.get('identifier')]
+
+        if not restaurant_ids:
+            print("Не удалось создать рестораны")
+            return
 
         for _ in range(args.count):
             generator.create_dish(random.choice(restaurant_ids))
 
     elif args.endpoint == "orders":
-        restaurants = [generator.create_restaurant() for _ in range(5)]
-        restaurant_ids = [rest['id'] for rest in restaurants]
+        restaurants = [r for r in [generator.create_restaurant() for _ in range(5)] if r is not None]
+        restaurant_ids = [rest.get('identifier') for rest in restaurants if rest.get('identifier')]
+
+        if not restaurant_ids:
+            print("Не удалось создать рестораны")
+            return
 
         dishes_by_restaurant = {}
         for rest_id in restaurant_ids:
-            dishes = [generator.create_dish(rest_id) for _ in range(10)]
-            dishes_by_restaurant[rest_id] = [dish['id'] for dish in dishes]
+            dishes = [d for d in [generator.create_dish(rest_id) for _ in range(10)] if d is not None]
+            dishes_by_restaurant[rest_id] = [dish.get('identifier') for dish in dishes if dish.get('identifier')]
 
         for _ in range(args.count):
             rest_id = random.choice(restaurant_ids)
-            generator.create_order(rest_id, dishes_by_restaurant[rest_id])
+            if dishes_by_restaurant[rest_id]:
+                generator.create_order(rest_id, dishes_by_restaurant[rest_id])
 
 if __name__ == "__main__":
     main()
