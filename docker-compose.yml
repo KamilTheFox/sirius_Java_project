@@ -64,6 +64,9 @@ services:
       - "8080:8080"
     networks:
       - postgres_network
+    mem_limit: 1024M
+    mem_reservation: 256M
+    cpus: '0.5'
 
 networks:
   postgres_network:
