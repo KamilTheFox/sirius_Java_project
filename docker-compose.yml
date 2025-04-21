@@ -69,10 +69,11 @@ services:
     cpus: '0.5'
     environment:
       - SERVER_TOMCAT_MAX_THREADS=200
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/my_database
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/sirius_java_bd
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=123
-      - SPRING_JPA_SHOW_SQL=false
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
 
 networks:
   postgres_network:
