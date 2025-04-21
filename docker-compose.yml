@@ -67,6 +67,9 @@ services:
     mem_limit: 1024M
     mem_reservation: 256M
     cpus: '0.5'
+    environment:
+      - SERVER_TOMCAT_MIN_SPARE_THREADS=10
+      - SPRING_JPA_SHOW_SQL=false
 
 networks:
   postgres_network:
