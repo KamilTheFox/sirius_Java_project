@@ -7,20 +7,10 @@ let postRequests = 0;
 let getRequests = 0;
 
 export function setup() {
-    const restaurants = http.get('http://localhost:8080/restaurants').json();
-    const restaurantData = [];
-    for (const rest of restaurants) {
-        const dishes = http.get(`http://localhost:8080/dishes/restaurant/${rest.identifier}`).json();
-        if (dishes.length > 0) {
-            restaurantData.push({
-                id: rest.identifier,
-                dishes: dishes.map(d => ({ id: d.identifier, price: d.price })),
-                minOrder: rest.minimumOrder
-            });
-        }
-    }
-    http.delete('http://localhost:8080/orders');
-    return { restaurantData };
+    const allRestaurants = http.get('http://localhost:8080/restaurants').json();
+    // Берем только первые 10 случайных ресторанов
+    const shuffled = [...allRestaurants].sort(() => 0.5 - Math.random()).slice(0, 10);
+    return { restaurants: shuffled };
 }
 
 export const options = {
@@ -39,33 +29,18 @@ export const options = {
     },
 };
 
-function makePostRequest(data) {
-    const restaurant = data.restaurantData[Math.floor(Math.random() * data.restaurantData.length)];
-
-    let total = 0;
-    const selectedDishes = [];
-    const shuffledDishes = [...restaurant.dishes].sort(() => 0.5 - Math.random());
-
-    for (const dish of shuffledDishes) {
-        if (total >= restaurant.minOrder) break;
-        selectedDishes.push(dish.id);
-        total += dish.price;
-    }
-
-    if (total < restaurant.minOrder) {
-        const cheapestDish = [...restaurant.dishes].sort((a, b) => a.price - b.price)[0];
-        selectedDishes.push(cheapestDish.id);
-        total += cheapestDish.price;
-    }
+function makePostRequest() {
+    const names = ["Pasta Place", "Burger Joint", "Sushi Spot", "Taco Stand", "Pizza Heaven"];
+    const cuisines = ["Italian", "American", "Japanese", "Mexican", "French"];
 
     const payload = {
-        restaurant: restaurant.id,
-        dishes: selectedDishes,
-        deliveryAddress: "Test Address, 123"
+        name: names[Math.floor(Math.random() * names.length)],
+        cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
+        minimumOrder: Math.random() * 50 + 10 // Случайное значение от 10 до 60
     };
 
     const res = http.post(
-        'http://localhost:8080/orders',
+        'http://localhost:8080/restaurants',
         JSON.stringify(payload),
         {
             headers: { 'Content-Type': 'application/json' },
@@ -77,8 +52,8 @@ function makePostRequest(data) {
     postRequests++;
 
     check(res, {
-        'Order created (status 200)': (r) => r.status === 200,
-        'Response has order identifier': (r) => !!r.json('identifier')
+        'Restaurant created (status 200)': (r) => r.status === 200,
+        'Response has restaurant identifier': (r) => !!r.json('identifier')
     });
 
     if (res.status !== 200 && res.status !== 0) {
@@ -87,18 +62,13 @@ function makePostRequest(data) {
 }
 
 function makeGetRequest(data) {
-    const restaurant = data.restaurantData[Math.floor(Math.random() * data.restaurantData.length)];
+    if (data.restaurants.length === 0) return;
 
-    // Варианты GET-запросов:
-    const endpoints = [
-        `/dishes/restaurant/${restaurant.id}`,
-        `/orders/restaurant/${restaurant.id}`,
-        `/orders/restaurant/${restaurant.id}/average-check`,
-        `/restaurants`
-    ];
-
-    const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
-    const res = http.get(`http://localhost:8080${endpoint}`, { tags: { type: 'GET' } });
+    const restaurant = data.restaurants[Math.floor(Math.random() * data.restaurants.length)];
+    const res = http.get(
+        `http://localhost:8080/orders/restaurant/${restaurant.identifier}/average-check`,
+        { tags: { type: 'GET' } }
+    );
 
     if (res.status === 0) statusZeroCount++;
     getRequests++;
@@ -109,7 +79,7 @@ function makeGetRequest(data) {
     });
 
     if (res.status !== 200 && res.status !== 0) {
-        console.error(`GET failed. Status: ${res.status}, Endpoint: ${endpoint}`);
+        console.error(`GET failed. Status: ${res.status}`);
     }
 }
 
@@ -119,7 +89,7 @@ export default function (data) {
     const random = Math.random() * 100;
 
     if (random < postRatio) {
-        makePostRequest(data);
+        makePostRequest();
     } else {
         makeGetRequest(data);
     }
