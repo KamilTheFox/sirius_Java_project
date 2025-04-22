@@ -1,8 +1,10 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-// Счетчик для запросов со статусом 0
+// Счетчики для статистики
 let statusZeroCount = 0;
+let postRequests = 0;
+let getRequests = 0;
 
 export function setup() {
     const restaurants = http.get('http://localhost:8080/restaurants').json();
@@ -30,15 +32,15 @@ export const options = {
         { duration: '5s', target: 0 },
     ],
     thresholds: {
-        http_req_duration: ['p(95)<500'],
-        http_req_failed: ['rate<0.05'],
+        'http_req_duration{type:POST}': ['p(95)<500'],
+        'http_req_duration{type:GET}': ['p(95)<300'],
+        'http_req_failed': ['rate<0.05'],
     },
 };
 
-export default function (data) {
+function makePostRequest(data) {
     const restaurant = data.restaurantData[Math.floor(Math.random() * data.restaurantData.length)];
 
-    // 1. Collect dishes until we reach the minimum order amount
     let total = 0;
     const selectedDishes = [];
     const shuffledDishes = [...restaurant.dishes].sort(() => 0.5 - Math.random());
@@ -49,14 +51,12 @@ export default function (data) {
         total += dish.price;
     }
 
-    // 2. If the total is still less than minimum, add the cheapest dish
     if (total < restaurant.minOrder) {
         const cheapestDish = [...restaurant.dishes].sort((a, b) => a.price - b.price)[0];
         selectedDishes.push(cheapestDish.id);
         total += cheapestDish.price;
     }
 
-    // 3. Send the order
     const payload = {
         restaurant: restaurant.id,
         dishes: selectedDishes,
@@ -66,42 +66,70 @@ export default function (data) {
     const res = http.post(
         'http://localhost:8080/orders',
         JSON.stringify(payload),
-        { headers: { 'Content-Type': 'application/json' } }
+        {
+            headers: { 'Content-Type': 'application/json' },
+            tags: { type: 'POST' }
+        }
     );
 
-    // Считаем запросы со статусом 0, но не логируем их
-    if (res.status === 0) {
-        statusZeroCount++;
-    }
+    if (res.status === 0) statusZeroCount++;
+    postRequests++;
 
-    // 4. Check the response
-    const checkResult = check(res, {
+    check(res, {
         'Order created (status 200)': (r) => r.status === 200,
-        'Response has order identifier': (r) => {
-            try {
-                const response = JSON.parse(r.body);
-                return !!response.identifier;
-            } catch {
-                return false;
-            }
-        }
+        'Response has order identifier': (r) => !!r.json('identifier')
     });
 
-    // Логируем только реальные ошибки (не 200 и не 0)
     if (res.status !== 200 && res.status !== 0) {
-        console.error(`Request failed. Status: ${res.status}, Body: ${res.body}`);
-        console.log('Sent payload:', JSON.stringify(payload, null, 2));
-        if (res.status === 400 && res.body.includes("minimumOrder")) {
-            console.log(`Minimum order: ${restaurant.minOrder}, current total: ${total}`);
-        }
+        console.error(`POST failed. Status: ${res.status}, Body: ${res.body}`);
+    }
+}
+
+function makeGetRequest(data) {
+    const restaurant = data.restaurantData[Math.floor(Math.random() * data.restaurantData.length)];
+
+    // Варианты GET-запросов:
+    const endpoints = [
+        `/restaurants/${restaurant.id}`,
+        `/dishes/restaurant/${restaurant.id}`,
+        '/restaurants'
+    ];
+
+    const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+    const res = http.get(`http://localhost:8080${endpoint}`, { tags: { type: 'GET' } });
+
+    if (res.status === 0) statusZeroCount++;
+    getRequests++;
+
+    check(res, {
+        'GET successful (status 200)': (r) => r.status === 200,
+        'Response has data': (r) => r.body.length > 0
+    });
+
+    if (res.status !== 200 && res.status !== 0) {
+        console.error(`GET failed. Status: ${res.status}, Endpoint: ${endpoint}`);
+    }
+}
+
+export default function (data) {
+    const ratio = __ENV.RATIO || '50/50';
+    const [postRatio, getRatio] = ratio.split('/').map(Number);
+    const random = Math.random() * 100;
+
+    if (random < postRatio) {
+        makePostRequest(data);
+    } else {
+        makeGetRequest(data);
     }
 
     sleep(0.5);
 }
 
-// Выводим итоговое количество запросов со статусом 0
 export function teardown() {
+    console.log(`\n[Итог] Соотношение запросов: ${__ENV.RATIO}`);
+    console.log(`POST запросов: ${postRequests}`);
+    console.log(`GET запросов: ${getRequests}`);
     if (statusZeroCount > 0) {
-        console.log(`\n[Итог] Всего запросов со статусом 0: ${statusZeroCount}`);
+        console.log(`Запросов со статусом 0: ${statusZeroCount}`);
     }
 }
