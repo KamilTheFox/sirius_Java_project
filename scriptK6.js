@@ -22,7 +22,7 @@ export function setup() {
 }
 
 export const options = {
-    setupTimeout: '30s
+    setupTimeout: '30s',
     httpTimeout: '2s',
     stages: [
         { duration: '10s', target: 10 },
