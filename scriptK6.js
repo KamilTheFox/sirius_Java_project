@@ -1,6 +1,9 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+// Счетчик для запросов со статусом 0
+let statusZeroCount = 0;
+
 export function setup() {
     const restaurants = http.get('http://localhost:8080/restaurants').json();
     const restaurantData = [];
@@ -65,6 +68,11 @@ export default function (data) {
         { headers: { 'Content-Type': 'application/json' } }
     );
 
+    // Считаем запросы со статусом 0, но не логируем их
+    if (res.status === 0) {
+        statusZeroCount++;
+    }
+
     // 4. Check the response
     const checkResult = check(res, {
         'Order created (status 200)': (r) => r.status === 200,
@@ -78,15 +86,21 @@ export default function (data) {
         }
     });
 
-    // Log only for real errors (not 200)
-    if (res.status !== 200) {
+    // Логируем только реальные ошибки (не 200 и не 0)
+    if (res.status !== 200 && res.status !== 0) {
         console.error(`Request failed. Status: ${res.status}, Body: ${res.body}`);
         console.log('Sent payload:', JSON.stringify(payload, null, 2));
-        // Check for minimum order violation
         if (res.status === 400 && res.body.includes("minimumOrder")) {
             console.log(`Minimum order: ${restaurant.minOrder}, current total: ${total}`);
         }
     }
 
     sleep(0.5);
+}
+
+// Выводим итоговое количество запросов со статусом 0
+export function teardown() {
+    if (statusZeroCount > 0) {
+        console.log(`\n[Итог] Всего запросов со статусом 0: ${statusZeroCount}`);
+    }
 }
