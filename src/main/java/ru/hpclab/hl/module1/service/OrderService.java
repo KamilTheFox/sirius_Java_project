@@ -1,6 +1,7 @@
 package ru.hpclab.hl.module1.service;
 
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.repository.OrderRepository;
 
@@ -65,6 +66,8 @@ public class OrderService
                 .sum();
         return totalAmount / monthlyOrders.size();
     }
+    
+    @Transactional
     public void clearAll() {
         orders.deleteAllOrdersNative();
     }

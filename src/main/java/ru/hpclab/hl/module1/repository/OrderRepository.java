@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.hpclab.hl.module1.model.Order;
 import ru.hpclab.hl.module1.model.Restaurant;
 
@@ -35,6 +36,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     );
 
     @Modifying
+    @Transactional
     @Query(value = "DELETE FROM orders", nativeQuery = true)
     void deleteAllOrdersNative();
 
