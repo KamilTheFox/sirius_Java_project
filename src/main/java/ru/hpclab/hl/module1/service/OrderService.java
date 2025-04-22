@@ -66,6 +66,6 @@ public class OrderService
         return totalAmount / monthlyOrders.size();
     }
     public void clearAll() {
-        orders.deleteAll();
+        orders.deleteAllOrdersNative();
     }
 }

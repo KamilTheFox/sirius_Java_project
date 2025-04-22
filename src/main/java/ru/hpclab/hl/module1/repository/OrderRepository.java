@@ -1,6 +1,7 @@
 package ru.hpclab.hl.module1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -32,6 +33,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             @Param("restaurant") UUID restaurant,
             @Param("monthAgo") LocalDateTime monthAgo
     );
+
+    @Modifying
+    @Query(value = "DELETE FROM orders", nativeQuery = true)
+    void deleteAllOrdersNative();
 
 }
 
