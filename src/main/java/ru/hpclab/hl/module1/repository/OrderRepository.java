@@ -14,13 +14,13 @@ import java.util.UUID;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
     // Поиск по ресторану
-    List<Order> findByRestaurant(Restaurant restaurant);
+    List<Order> findByRestaurant(UUID restaurant);
 
     // Поиск заказов ресторана за последний месяц
     @Query("SELECT o FROM Order o WHERE o.restaurant = :restaurant " +
             "AND o.deliveryTime > :monthAgo")
     List<Order> findByRestaurantAndDeliveryTimeAfter(
-            @Param("restaurant") Restaurant restaurant,
+            @Param("restaurant") UUID restaurant,
             @Param("monthAgo") LocalDateTime monthAgo
     );
 
@@ -29,7 +29,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             "WHERE o.restaurant = :restaurant " +
             "AND o.deliveryTime > :monthAgo")
     Double calculateAverageCheckForPeriod(
-            @Param("restaurant") Restaurant restaurant,
+            @Param("restaurant") UUID restaurant,
             @Param("monthAgo") LocalDateTime monthAgo
     );
 

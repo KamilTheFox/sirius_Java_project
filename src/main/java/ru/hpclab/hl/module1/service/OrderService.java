@@ -47,12 +47,12 @@ public class OrderService
     }
 
     public List<Order> getRestaurantOrders(Restaurant restaurant) {
-        return orders.findByRestaurant(restaurant);
+        return orders.findByRestaurant(restaurant.getIdentifier());
     }
 
     public List<Order> getRestaurantMonthlyOrders(Restaurant restaurant) {
         LocalDateTime monthAgo = LocalDateTime.now().minusMonths(1);
-        return orders.findByRestaurantAndDeliveryTimeAfter(restaurant, monthAgo);
+        return orders.findByRestaurantAndDeliveryTimeAfter(restaurant.getIdentifier(), monthAgo);
     }
 
     public double calculateAverageCheck(Restaurant restaurant) {

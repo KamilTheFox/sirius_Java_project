@@ -90,7 +90,6 @@ function makeGetRequest(data) {
 
     // Варианты GET-запросов:
     const endpoints = [
-        `/restaurants/${restaurant.id}`,
         `/dishes/restaurant/${restaurant.id}`,
         '/restaurants'
     ];
