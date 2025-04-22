@@ -66,7 +66,7 @@ public class OrderService
                 .sum();
         return totalAmount / monthlyOrders.size();
     }
-    
+
     @Transactional
     public void clearAll() {
         orders.deleteAllOrdersNative();

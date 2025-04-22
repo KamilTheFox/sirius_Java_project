@@ -9,7 +9,6 @@ let getRequests = 0;
 export function setup() {
     const restaurants = http.get('http://localhost:8080/restaurants').json();
     const restaurantData = [];
-
     for (const rest of restaurants) {
         const dishes = http.get(`http://localhost:8080/dishes/restaurant/${rest.identifier}`).json();
         if (dishes.length > 0) {
@@ -20,15 +19,17 @@ export function setup() {
             });
         }
     }
+    http.delete('http://localhost:8080/orders');
     return { restaurantData };
 }
 
 export const options = {
     setupTimeout: '30s',
     httpTimeout: '2s',
+    consoleOutput: 'none',
     stages: [
         { duration: '10s', target: 10 },
-        { duration: '1m', target: 1500 },
+        { duration: '1m', target: 1000 },
         { duration: '5s', target: 0 },
     ],
     thresholds: {
@@ -91,7 +92,9 @@ function makeGetRequest(data) {
     // Варианты GET-запросов:
     const endpoints = [
         `/dishes/restaurant/${restaurant.id}`,
-        '/restaurants'
+        `/orders/restaurant/${restaurant.id}`,
+        `/orders/restaurant/${restaurant.id}/average-check`,
+        `/restaurants`
     ];
 
     const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
