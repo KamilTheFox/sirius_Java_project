@@ -4,6 +4,16 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.stream.*;
 
+//      long start = System.currentTimeMillis();
+//      try
+//      {
+//        // код
+//      }
+//      finally
+//      {
+//        ObservabilityService.recordTiming("metric", System.currentTimeMillis() - start);
+//      }
+
 public final class ObservabilityService {
     private static final ConcurrentMap<String, TimingStats> metrics = new ConcurrentHashMap<>();
     private static final long CLEANUP_THRESHOLD_MS = TimeUnit.MINUTES.toMillis(5);

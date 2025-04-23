@@ -20,11 +20,17 @@ public class RestaurantController
 
     @PostMapping
     public ResponseEntity<Restaurant> addRestaurant(@RequestBody RestaurantCreateDTO restaurant) {
-        return ResponseEntity.ok(restaurantService.addRestaurant(
-                new Restaurant(
-                        restaurant.getName(),
-                        restaurant.getCuisine(),
-                        restaurant.getMinimumOrder())));
+        long start = System.currentTimeMillis();
+        try {
+            return ResponseEntity.ok(restaurantService.addRestaurant(
+                    new Restaurant(
+                            restaurant.getName(),
+                            restaurant.getCuisine(),
+                            restaurant.getMinimumOrder())));
+        }
+        finally {
+            ObservabilityService.recordTiming("Post Restaurant", System.currentTimeMillis() - start);
+        }
     }
 
     @GetMapping
