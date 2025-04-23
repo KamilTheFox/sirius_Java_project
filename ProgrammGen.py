@@ -95,12 +95,12 @@ class DataGenerator:
 
                 data = {
                     "restaurant": restaurant_id,
-                    "dishes": random.sample(dish_ids, random.randint(1, len(dish_ids))),
+                    "dishes": random.choices(dish_ids, k=random.randint(5, max(5, len(dish_ids)))),
                     "deliveryAddress": f"{fake.street_address()}, {fake.city()}"
                 }
                 response = requests.post(f"{self.base_url}/orders", json=data)
                 if response.status_code == 400:
-                    print(f"Ошибка в данных запроса: {response.text}")
+                    print(f"Ошибка в данных запроса: {data}")
                     return None
                 response.raise_for_status()
                 return response.json()
