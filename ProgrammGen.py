@@ -3,6 +3,7 @@ import requests
 from faker import Faker
 import uuid
 import random
+import time
 
 fake = Faker('ru_RU')
 
@@ -82,26 +83,33 @@ class DataGenerator:
         return self.dishes_cache[restaurant_id]
     
 
-    def create_order(self, restaurant_id):
-        restaurant_dishes = self.get_restaurant_dishes(restaurant_id)
-        if not restaurant_dishes:
-            print(f"Нет доступных блюд для ресторана {restaurant_id}")
-            return None
+    def create_order(self, restaurant_id, max_retries=15, delay=1):
+        for attempt in range(max_retries):
+            try:
+                restaurant_dishes = self.get_restaurant_dishes(restaurant_id)
+                if not restaurant_dishes:
+                    print(f"Нет доступных блюд для ресторана {restaurant_id}")
+                    return None
 
-        dish_ids = [dish['identifier'] for dish in restaurant_dishes]
-        
-        data = {
-            "restaurant": restaurant_id,
-            "dishes": random.sample(dish_ids, random.randint(1, min(5, len(dish_ids)))),
-            "deliveryAddress": f"{fake.street_address()}, {fake.city()}"
-        }
-        try:
-            response = requests.post(f"{self.base_url}/orders", json=data)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Ошибка при создании заказа: {e}")
-            return None
+                dish_ids = [dish['identifier'] for dish in restaurant_dishes]
+
+                data = {
+                    "restaurant": restaurant_id,
+                    "dishes": random.sample(dish_ids, random.randint(1, len(dish_ids))),
+                    "deliveryAddress": f"{fake.street_address()}, {fake.city()}"
+                }
+                response = requests.post(f"{self.base_url}/orders", json=data)
+                if response.status_code == 400:
+                    print(f"Ошибка в данных запроса: {response.text}")
+                    return None
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries - 1:
+                    print(f"Все попытки создания заказа исчерпаны. Последняя ошибка: {e}")
+                    return None
+                print(f"Попытка {attempt + 1} не удалась: {e}. Повторяем через {delay} сек...")
+                time.sleep(delay)
 
 def main():
     parser = argparse.ArgumentParser(description='Generate test data for REST API')
