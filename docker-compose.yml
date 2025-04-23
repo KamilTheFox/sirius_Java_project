@@ -56,6 +56,7 @@ services:
 #      - postgres_network
 
   app:
+    image: foxlover/java_project_hl:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -64,7 +65,7 @@ services:
       - "8080:8080"
     networks:
       - postgres_network
-    mem_limit: 1024M
+    mem_limit: 2048M
     mem_reservation: 256M
     cpus: '0.5'
     environment:
