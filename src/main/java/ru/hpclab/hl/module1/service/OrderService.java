@@ -19,7 +19,7 @@ public class OrderService
 
     private final RestTemplate restTemplate;
 
-    private final String AVERAGE_CHECK_SERVICE_URL = "http://appadd:8081/average-check";
+    private final String AVERAGE_CHECK_SERVICE_URL = "http://additional:8081/average-check";
 
     public OrderService(OrderRepository orders, RestTemplate restTemplate) {
         this.orders = orders;
