@@ -59,6 +59,7 @@ public class OrderController {
             ObservabilityService.recordTiming("Get Average-check SERVICE", System.currentTimeMillis() - start);
         }
     }
+
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearAll() {
         orderService.clearAll();
