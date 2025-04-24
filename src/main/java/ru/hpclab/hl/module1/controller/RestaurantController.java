@@ -40,13 +40,13 @@ public class RestaurantController
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/{name:^[a-zA-Z]+$}")
     public ResponseEntity<Restaurant> getRestaurantByName(@PathVariable String name) {
         Restaurant restaurant = restaurantService.getRestaurantByName(name);
         return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{restaurantID}")
+    @GetMapping("/{id:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$}")
     public ResponseEntity<Restaurant> getRestaurantByID(@PathVariable UUID id) {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(id);
         return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
