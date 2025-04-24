@@ -53,8 +53,8 @@ public class OrderController {
     public ResponseEntity<Double> getAverageCheck(@PathVariable UUID restaurantId)
     {
         long start = System.currentTimeMillis();
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         try {
-            Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
             return ResponseEntity.ok(orderService.calculateAverageCheck(restaurant));
         }
         finally {

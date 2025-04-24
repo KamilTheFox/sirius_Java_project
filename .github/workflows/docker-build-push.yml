@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/java_project_hl
-  TAG: latest
+  TAG: LAB7
 
 jobs:
   build-and-push:

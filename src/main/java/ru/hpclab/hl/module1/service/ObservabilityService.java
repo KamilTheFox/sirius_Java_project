@@ -1,4 +1,6 @@
 package ru.hpclab.hl.module1.service;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -54,13 +56,22 @@ public final class ObservabilityService {
         public final Map<String, MetricStats> last10s;
         public final Map<String, MetricStats> last30s;
         public final Map<String, MetricStats> last1m;
+        public final String timestamp;
 
         public MetricsSnapshot(Map<String, MetricStats> last10s,
                                Map<String, MetricStats> last30s,
                                Map<String, MetricStats> last1m) {
+            this(last10s, last30s, last1m, Instant.now());
+        }
+
+        public MetricsSnapshot(Map<String, MetricStats> last10s,
+                               Map<String, MetricStats> last30s,
+                               Map<String, MetricStats> last1m,
+                               Instant instant) {
             this.last10s = Collections.unmodifiableMap(last10s);
             this.last30s = Collections.unmodifiableMap(last30s);
             this.last1m = Collections.unmodifiableMap(last1m);
+            this.timestamp = DateTimeFormatter.ISO_INSTANT.format(instant);
         }
     }
 

@@ -27,8 +27,15 @@ public class RestaurantService
     public Restaurant getRestaurantByName(String name) {
         return restaurants.findByName(name).orElse(null);
     }
-    public Restaurant getRestaurantByUUID(UUID id) {
-        return restaurants.getReferenceById(id);
+    public Restaurant getRestaurantByUUID(UUID id)
+    {
+        long start = System.currentTimeMillis();
+        try {
+            return restaurants.getReferenceById(id);
+        }
+        finally {
+            ObservabilityService.recordTiming("Get SQL RestaurantByUUID", System.currentTimeMillis() - start);
+        }
     }
     public void clearAll() {
         restaurants.deleteAll();
