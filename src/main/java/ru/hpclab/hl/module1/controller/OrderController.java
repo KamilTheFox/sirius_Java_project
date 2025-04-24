@@ -17,7 +17,6 @@ public class OrderController {
     private final RestaurantService restaurantService;
     private final DishService dishService;
 
-
     public OrderController(OrderService orderService, RestaurantService restaurantService, DishService dishService) {
         this.orderService = orderService;
         this.restaurantService = restaurantService;
@@ -53,12 +52,11 @@ public class OrderController {
     public ResponseEntity<Double> getAverageCheck(@PathVariable UUID restaurantId)
     {
         long start = System.currentTimeMillis();
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         try {
-            return ResponseEntity.ok(orderService.calculateAverageCheck(restaurant));
+            return ResponseEntity.ok(orderService.calculateAverageCheck(restaurantId));
         }
         finally {
-            ObservabilityService.recordTiming("Get Average-check", System.currentTimeMillis() - start);
+            ObservabilityService.recordTiming("Get Average-check SERVICE", System.currentTimeMillis() - start);
         }
     }
     @DeleteMapping("/clear")

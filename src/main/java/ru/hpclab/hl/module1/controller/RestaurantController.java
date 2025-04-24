@@ -7,6 +7,7 @@ import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.service.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/restaurants")
@@ -44,6 +45,13 @@ public class RestaurantController
         Restaurant restaurant = restaurantService.getRestaurantByName(name);
         return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/{restaurantID}")
+    public ResponseEntity<Restaurant> getRestaurantByID(@PathVariable UUID id) {
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(id);
+        return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearAll() {
         restaurantService.clearAll();

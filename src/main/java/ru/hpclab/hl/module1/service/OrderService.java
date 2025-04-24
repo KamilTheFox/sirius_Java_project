@@ -1,7 +1,11 @@
 package ru.hpclab.hl.module1.service;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.repository.OrderRepository;
 
@@ -13,8 +17,13 @@ public class OrderService
 {
     private final OrderRepository orders;
 
-    public OrderService(OrderRepository orders) {
+    private final RestTemplate restTemplate;
+
+    private final String AVERAGE_CHECK_SERVICE_URL = "http://localhost:8081/average-check";
+
+    public OrderService(OrderRepository orders, RestTemplate restTemplate) {
         this.orders = orders;
+        this.restTemplate = restTemplate;
     }
 
     public Order createOrder(Restaurant restaurant,
@@ -56,15 +65,27 @@ public class OrderService
         return orders.findByRestaurantAndDeliveryTimeAfter(restaurant.getIdentifier(), monthAgo);
     }
 
-    public double calculateAverageCheck(Restaurant restaurant) {
-        List<Order> monthlyOrders = getRestaurantMonthlyOrders(restaurant);
-        if (monthlyOrders.isEmpty()) {
-            return 0.0;
+    public double calculateAverageCheck(UUID restaurantId) {
+        try {
+            String url = AVERAGE_CHECK_SERVICE_URL + "/restaurant/" + restaurantId;
+
+            ResponseEntity<Double> response = restTemplate.getForEntity(
+                    url,
+                    Double.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return response.getBody();
+            } else {
+                // Обработка ошибок в зависимости от статус кода
+                throw new RuntimeException("Не удалось получить средний чек. Status: "
+                        + response.getStatusCode());
+            }
+
+        } catch (RestClientException e) {
+            // Обработка ошибок связи с сервисом
+            throw new RuntimeException("Ошибка при обращении к сервису среднего чека", e);
         }
-        double totalAmount = monthlyOrders.stream()
-                .mapToDouble(Order::getTotalAmount)
-                .sum();
-        return totalAmount / monthlyOrders.size();
     }
 
     @Transactional
