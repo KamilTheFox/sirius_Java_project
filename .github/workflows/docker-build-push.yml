@@ -2,9 +2,9 @@ name: Docker Build and Push
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "LAB7" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "LAB7" ]
 
 env:
   REGISTRY: docker.io
