@@ -56,18 +56,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/restaurant/{restaurantId}/average-check")
-    public ResponseEntity<AverageCheckDTO> getAverageCheck(@PathVariable UUID restaurantId)
-    {
-        long start = System.currentTimeMillis();
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
-        try {
-            return ResponseEntity.ok(orderService.calculateAverageCheck(restaurant.getIdentifier()));
-        }
-        finally {
-            ObservabilityService.recordTiming("Get Average-check", System.currentTimeMillis() - start);
-        }
-    }
+
 
     @GetMapping("/restaurants/average-check")
     public ResponseEntity<AllAverageCheckDTO> getAllAverageCheck()
