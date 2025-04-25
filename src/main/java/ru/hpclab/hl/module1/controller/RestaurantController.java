@@ -1,5 +1,6 @@
 package ru.hpclab.hl.module1.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import ru.hpclab.hl.module1.dto.RestaurantCreateDTO;
@@ -39,7 +40,8 @@ public class RestaurantController
     {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
-
+    
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getRestaurantByID(@PathVariable UUID id) {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(id);
