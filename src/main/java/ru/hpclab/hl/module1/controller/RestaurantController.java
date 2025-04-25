@@ -40,8 +40,7 @@ public class RestaurantController
     {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
-    
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getRestaurantByID(@PathVariable UUID id) {
         Restaurant restaurant = restaurantService.getRestaurantByUUID(id);

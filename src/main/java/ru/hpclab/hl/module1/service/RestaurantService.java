@@ -31,7 +31,7 @@ public class RestaurantService
     {
         long start = System.currentTimeMillis();
         try {
-            return restaurants.getReferenceById(id);
+            return restaurants.findByIdentifier(id).orElse(null);
         }
         finally {
             ObservabilityService.recordTiming("Get SQL RestaurantByUUID", System.currentTimeMillis() - start);
