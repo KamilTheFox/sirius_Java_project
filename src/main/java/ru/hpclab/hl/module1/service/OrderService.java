@@ -71,7 +71,7 @@ public class OrderService
 
     public AllAverageCheckDTO getAverageCheckAll()
     {
-        String url = AVERAGE_CHECK_SERVICE_URL + "/restaurants/";
+        String url = AVERAGE_CHECK_SERVICE_URL + "/restaurants";
         ResponseEntity<AllAverageCheckDTO> restaurantResponse = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -80,29 +80,7 @@ public class OrderService
         return restaurantResponse.getBody();
     }
 
-    public AverageCheckDTO calculateAverageCheck(UUID restaurantId) {
-        try {
-            String url = AVERAGE_CHECK_SERVICE_URL + "/restaurant/" + restaurantId;
 
-            ResponseEntity<AverageCheckDTO> restaurantResponse = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<AverageCheckDTO>() {});
-
-            if (restaurantResponse.getStatusCode() == HttpStatus.OK && restaurantResponse.getBody() != null) {
-                return restaurantResponse.getBody();
-            } else {
-                // Обработка ошибок в зависимости от статус кода
-                throw new RuntimeException("Не удалось получить средний чек. Status: "
-                        + restaurantResponse.getStatusCode());
-            }
-
-        } catch (RestClientException e) {
-            // Обработка ошибок связи с сервисом
-            throw new RuntimeException("Ошибка при обращении к сервису среднего чека", e);
-        }
-    }
 
     @Transactional
     public void clearAll() {
