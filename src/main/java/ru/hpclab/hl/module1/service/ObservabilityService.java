@@ -162,8 +162,15 @@ public final class ObservabilityService {
         public MetricStats(long count, double avgMs, long minMs, long maxMs) {
             this.count = count;
             this.avgMs = avgMs;
-            this.minMs = minMs;
-            this.maxMs = maxMs;
+
+            // Если avgMs == 0, устанавливаем minMs и maxMs в минимальное значение (0)
+            if (avgMs == 0) {
+                this.minMs = 0;
+                this.maxMs = 0;
+            } else {
+                this.minMs = minMs;
+                this.maxMs = maxMs;
+            }
         }
     }
 }
