@@ -19,7 +19,52 @@ import java.util.stream.*;
 public final class ObservabilityService {
     private static final ConcurrentMap<String, TimingStats> metrics = new ConcurrentHashMap<>();
     private static final long CLEANUP_THRESHOLD_MS = TimeUnit.MINUTES.toMillis(5);
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final long PRINT_INTERVAL_SECONDS = 30;
 
+    static {
+        // Запускаем периодический вывод метрик
+        scheduler.scheduleAtFixedRate(
+                ObservabilityService::printMetrics,
+                PRINT_INTERVAL_SECONDS,
+                PRINT_INTERVAL_SECONDS,
+                TimeUnit.SECONDS
+        );
+
+        // Добавляем shutdown hook для корректного завершения
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }));
+    }
+    // Новый метод для вывода метрик
+    private static void printMetrics() {
+        MetricsSnapshot snapshot = getMetricsAndClean();
+        System.out.println("\n=== Metrics Report at " + snapshot.timestamp + " ===");
+
+        printMetricGroup("Last 10 seconds", snapshot.last10s);
+        printMetricGroup("Last 30 seconds", snapshot.last30s);
+        printMetricGroup("Last 1 minute", snapshot.last1m);
+    }
+    private static void printMetricGroup(String title, Map<String, MetricStats> stats) {
+        System.out.println("\n" + title + ":");
+        if (stats.isEmpty()) {
+            System.out.println("  No metrics recorded");
+            return;
+        }
+
+        stats.forEach((name, metric) -> {
+            System.out.printf("  %s: count=%d, avg=%.2fms, min=%dms, max=%dms%n",
+                    name, metric.count, metric.avgMs, metric.minMs, metric.maxMs);
+        });
+    }
     // Thread-safe запись метрик
     public static void recordTiming(String metricName, long durationMs) {
         metrics.computeIfAbsent(metricName, k -> new TimingStats()).addRecord(durationMs);
@@ -117,8 +162,15 @@ public final class ObservabilityService {
         public MetricStats(long count, double avgMs, long minMs, long maxMs) {
             this.count = count;
             this.avgMs = avgMs;
-            this.minMs = minMs;
-            this.maxMs = maxMs;
+
+            // Если avgMs == 0, устанавливаем minMs и maxMs в минимальное значение (0)
+            if (avgMs == 0) {
+                this.minMs = 0;
+                this.maxMs = 0;
+            } else {
+                this.minMs = minMs;
+                this.maxMs = maxMs;
+            }
         }
     }
 }
