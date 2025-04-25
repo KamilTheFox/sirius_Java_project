@@ -44,8 +44,14 @@ public class OrderController {
 
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<Order>> getRestaurantOrders(@PathVariable UUID restaurantId) {
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
-        return ResponseEntity.ok(orderService.getRestaurantOrders(restaurant));
+        long start = System.currentTimeMillis();
+        try {
+            Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
+            return ResponseEntity.ok(orderService.getRestaurantOrders(restaurant));
+        }
+        finally {
+            ObservabilityService.recordTiming("getRestaurantOrders", System.currentTimeMillis() - start);
+        }
     }
 
     @GetMapping("/restaurant/{restaurantId}/average-check")

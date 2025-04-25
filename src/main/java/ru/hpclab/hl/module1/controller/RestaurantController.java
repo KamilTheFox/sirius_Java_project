@@ -38,13 +38,25 @@ public class RestaurantController
     @GetMapping
     public ResponseEntity<List<Restaurant>> getAllRestaurants()
     {
-        return ResponseEntity.ok(restaurantService.getAllRestaurants());
+        long start = System.currentTimeMillis();
+        try {
+            return ResponseEntity.ok(restaurantService.getAllRestaurants());
+        }
+        finally {
+            ObservabilityService.recordTiming("Get Restaurants", System.currentTimeMillis() - start);
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getRestaurantByID(@PathVariable UUID id) {
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(id);
-        return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
+        long start = System.currentTimeMillis();
+        try {
+            Restaurant restaurant = restaurantService.getRestaurantByUUID(id);
+            return restaurant != null ? ResponseEntity.ok(restaurant) : ResponseEntity.notFound().build();
+        }
+        finally {
+            ObservabilityService.recordTiming("Get Restaurant ByID", System.currentTimeMillis() - start);
+        }
     }
 
     @DeleteMapping("/clear")

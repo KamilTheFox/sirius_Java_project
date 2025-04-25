@@ -40,15 +40,27 @@ public class DishController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Dish> getDishById(@PathVariable UUID id) {
-        Dish dish = dishService.getDishById(id);
-        return dish != null ? ResponseEntity.ok(dish) : ResponseEntity.notFound().build();
+        long start = System.currentTimeMillis();
+        try {
+            Dish dish = dishService.getDishById(id);
+            return dish != null ? ResponseEntity.ok(dish) : ResponseEntity.notFound().build();
+        }
+        finally {
+            ObservabilityService.recordTiming("Get All Dishes", System.currentTimeMillis() - start);
+        }
     }
 
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<Dish>> getDishesByRestaurant(@PathVariable UUID restaurantId) 
     {
-        List<Dish> dishes = dishService.getDishesByRestaurant(restaurantId);
-        return ResponseEntity.ok(dishes != null ? dishes : Collections.emptyList());
+        long start = System.currentTimeMillis();
+        try {
+            List<Dish> dishes = dishService.getDishesByRestaurant(restaurantId);
+            return ResponseEntity.ok(dishes != null ? dishes : Collections.emptyList());
+        }
+        finally {
+            ObservabilityService.recordTiming("DishesByRestaurant", System.currentTimeMillis() - start);
+        }
     }
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearAll() {
