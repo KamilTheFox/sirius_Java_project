@@ -70,10 +70,11 @@ public class OrderController {
         long start = System.currentTimeMillis();
         try {
             AllAverageCheckDTO allCheck = new AllAverageCheckDTO();
-            List<Restaurant> restaurants = restaurantService.getAllRestaurants();
-            restaurants.forEach(rest ->
+            List<Order> restaurants = orderService.getAllOrders();
+            restaurants.forEach(order ->
                     {
-                        AverageCheckDTO averageCash = orderService.calculateAverageCheck(rest);
+                        Restaurant restaurant = restaurantService.getRestaurantByUUID(order.getRestaurant());
+                        AverageCheckDTO averageCash = orderService.calculateAverageCheck(restaurant);
                         allCheck.allCheck.add(averageCash);
                     });
             return ResponseEntity.ok(allCheck);
