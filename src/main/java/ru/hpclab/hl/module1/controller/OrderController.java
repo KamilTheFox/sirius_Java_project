@@ -70,10 +70,9 @@ public class OrderController {
     }
 
     @GetMapping("/restaurants/average-check")
-    public ResponseEntity<AllAverageCheckDTO> getAllAverageCheck(@PathVariable UUID restaurantId)
+    public ResponseEntity<AllAverageCheckDTO> getAllAverageCheck()
     {
         long start = System.currentTimeMillis();
-        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
         try {
             return ResponseEntity.ok(orderService.getAverageCheckAll());
         }
