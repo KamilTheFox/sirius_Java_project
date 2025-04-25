@@ -1,11 +1,15 @@
 package ru.hpclab.hl.module1.service;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import ru.hpclab.hl.module1.dto.AllAverageCheckDTO;
+import ru.hpclab.hl.module1.dto.AverageCheckDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.repository.OrderRepository;
 
@@ -65,21 +69,33 @@ public class OrderService
         return orders.findByRestaurantAndDeliveryTimeAfter(restaurant.getIdentifier(), monthAgo);
     }
 
-    public double calculateAverageCheck(UUID restaurantId) {
+    public AllAverageCheckDTO getAverageCheckAll()
+    {
+        String url = AVERAGE_CHECK_SERVICE_URL + "/restaurants/";
+        ResponseEntity<AllAverageCheckDTO> restaurantResponse = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<AllAverageCheckDTO>() {});
+        return restaurantResponse.getBody();
+    }
+
+    public AverageCheckDTO calculateAverageCheck(UUID restaurantId) {
         try {
             String url = AVERAGE_CHECK_SERVICE_URL + "/restaurant/" + restaurantId;
 
-            ResponseEntity<Double> response = restTemplate.getForEntity(
+            ResponseEntity<AverageCheckDTO> restaurantResponse = restTemplate.exchange(
                     url,
-                    Double.class
-            );
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<AverageCheckDTO>() {});
 
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                return response.getBody();
+            if (restaurantResponse.getStatusCode() == HttpStatus.OK && restaurantResponse.getBody() != null) {
+                return restaurantResponse.getBody();
             } else {
                 // Обработка ошибок в зависимости от статус кода
                 throw new RuntimeException("Не удалось получить средний чек. Status: "
-                        + response.getStatusCode());
+                        + restaurantResponse.getStatusCode());
             }
 
         } catch (RestClientException e) {
