@@ -2,6 +2,8 @@ package ru.hpclab.hl.module1.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hpclab.hl.module1.dto.AllAverageCheckDTO;
+import ru.hpclab.hl.module1.dto.AverageCheckDTO;
 import ru.hpclab.hl.module1.dto.OrderCreateDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.service.*;
@@ -50,7 +52,7 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}/average-check")
-    public ResponseEntity<Double> getAverageCheck(@PathVariable UUID restaurantId)
+    public ResponseEntity<AverageCheckDTO> getAverageCheck(@PathVariable UUID restaurantId)
     {
         long start = System.currentTimeMillis();
         Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
@@ -61,6 +63,28 @@ public class OrderController {
             ObservabilityService.recordTiming("Get Average-check", System.currentTimeMillis() - start);
         }
     }
+
+    @GetMapping("/restaurant/average-check")
+    public ResponseEntity<AllAverageCheckDTO> getAllAverageCheck(@PathVariable UUID restaurantId)
+    {
+        long start = System.currentTimeMillis();
+        Restaurant restaurant = restaurantService.getRestaurantByUUID(restaurantId);
+        try {
+            AllAverageCheckDTO allCheck = new AllAverageCheckDTO();
+            List<Restaurant> restaurants = restaurantService.getAllRestaurants();
+            restaurants.forEach(rest ->
+                    {
+                        AverageCheckDTO averageCash = orderService.calculateAverageCheck(restaurant);
+                        allCheck.allCheck.add(averageCash);
+                    });
+            return ResponseEntity.ok(allCheck);
+        }
+        finally {
+            ObservabilityService.recordTiming("Get Average-check", System.currentTimeMillis() - start);
+        }
+    }
+
+
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearAll() {
         orderService.clearAll();

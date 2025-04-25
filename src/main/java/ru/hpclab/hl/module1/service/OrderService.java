@@ -2,6 +2,7 @@ package ru.hpclab.hl.module1.service;
 
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hpclab.hl.module1.dto.AverageCheckDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.repository.OrderRepository;
 
@@ -56,15 +57,20 @@ public class OrderService
         return orders.findByRestaurantAndDeliveryTimeAfter(restaurant.getIdentifier(), monthAgo);
     }
 
-    public double calculateAverageCheck(Restaurant restaurant) {
+    public AverageCheckDTO calculateAverageCheck(Restaurant restaurant) {
         List<Order> monthlyOrders = getRestaurantMonthlyOrders(restaurant);
         if (monthlyOrders.isEmpty()) {
-            return 0.0;
+            return null;
         }
         double totalAmount = monthlyOrders.stream()
                 .mapToDouble(Order::getTotalAmount)
                 .sum();
-        return totalAmount / monthlyOrders.size();
+
+        AverageCheckDTO average = new AverageCheckDTO();
+        average.setAverage_Check(totalAmount / monthlyOrders.size());
+        average.setNameRestaurant(restaurant.getName());
+
+        return average;
     }
 
     @Transactional
