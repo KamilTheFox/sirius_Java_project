@@ -64,7 +64,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/restaurant/average-check")
+    @GetMapping("/restaurants/average-check")
     public ResponseEntity<AllAverageCheckDTO> getAllAverageCheck(@PathVariable UUID restaurantId)
     {
         long start = System.currentTimeMillis();
