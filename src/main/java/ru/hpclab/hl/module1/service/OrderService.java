@@ -2,20 +2,26 @@ package ru.hpclab.hl.module1.service;
 
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hpclab.hl.module1.dto.AllAverageCheckDTO;
 import ru.hpclab.hl.module1.dto.AverageCheckDTO;
 import ru.hpclab.hl.module1.model.*;
 import ru.hpclab.hl.module1.repository.OrderRepository;
 
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService
 {
     private final OrderRepository orders;
 
-    public OrderService(OrderRepository orders) {
+    private final RestaurantService restaurantService;
+
+    public OrderService(OrderRepository orders,
+                        RestaurantService restaurantService) {
         this.orders = orders;
+        this.restaurantService = restaurantService;
     }
 
     public Order createOrder(Restaurant restaurant,
@@ -50,6 +56,32 @@ public class OrderService
 
     public List<Order> getRestaurantOrders(Restaurant restaurant) {
         return orders.findByRestaurant(restaurant.getIdentifier());
+    }
+
+    public AllAverageCheckDTO calculateAverageChecks()
+    {
+        AllAverageCheckDTO result = new AllAverageCheckDTO();
+
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+
+        orders.findAll().stream()
+                .filter(order -> order.getDeliveryTime().isAfter(oneMonthAgo))
+                .collect(Collectors.groupingBy(
+                        order ->
+                        {
+                            UUID id = order.getRestaurant();
+                            return restaurantService.getRestaurantByUUID(id).getName();
+                        },
+                        Collectors.averagingDouble(Order::getTotalAmount)
+                ))
+                .forEach((name, average) -> {
+                    AverageCheckDTO dto = new AverageCheckDTO();
+                    dto.setNameRestaurant(name);
+                    dto.setAverage_Check(average);
+                    result.getAllCheck().add(dto);
+                });
+
+        return result;
     }
 
     public List<Order> getRestaurantMonthlyOrders(Restaurant restaurant) {
