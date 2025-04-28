@@ -18,8 +18,8 @@ public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "ваш_сервер:9092");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "ваш_group_id");
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "hl22.zil:9094");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "var13");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(config);
