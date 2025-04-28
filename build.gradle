@@ -36,8 +36,8 @@ dependencies {
 
     implementation 'org.flywaydb:flyway-core:9.22.3'
 
-    // Обновленная зависимость для Kafka
-    implementation 'org.springframework.kafka:spring-kafka:3.0.9'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.apache.kafka:kafka-clients'
 }
 
 tasks.named('test') {
