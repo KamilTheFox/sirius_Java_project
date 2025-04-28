@@ -1,80 +1,36 @@
 version: '3.8'
 services:
-# database:
-#   build:
-#     context: .
-#     dockerfile: Dockerfile.postgres
-#   container_name: my_database
-#   environment:
-#     POSTGRES_DB: sirius_java_bd
-#     POSTGRES_USER: user
-#     POSTGRES_PASSWORD: 123
-#   ports:
-#     - "5432:5432"
-#   volumes:
-#     - postgres_data:/var/lib/postgresql/data
-#     - ./sql:/docker-entrypoint-initdb.d
-#   healthcheck:
-#     test: ["CMD-SHELL", "pg_isready -U user -d sirius_java_bd"]
-#     interval: 5s
-#     timeout: 5s
-#     retries: 5
-#   networks:
-#     - postgres_network
-
-#  init-db:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.init
-#    container_name: init_db
-#    depends_on:
-#      database:
-#        condition: service_healthy
-#    environment:
-#      POSTGRES_DB: sirius_java_bd
-#      POSTGRES_USER: user
-#      POSTGRES_PASSWORD: 123
-#      POSTGRES_HOST: database
-#      PGPASSWORD: 123  # Передаём пароль для psq
-#    command: >
-#      sh -c "python3 /sql/generate_data.py &&
-#             psql -h database -U user -d sirius_java_bd -f /sql/init.sql"
-#    networks:
-#      - postgres_network
-
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    container_name: pgadmin4
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: kam@admin.com
-#      PGADMIN_DEFAULT_PASSWORD: 123
-#    ports:
-#     - "5050:80"
-#    depends_on:
-#      - database
-#    networks:
-#      - postgres_network
+  appadd:
+    image: foxlover/java_project_hl:LAB9_ADD
+    container_name: additional
+    ports:
+      - "8081:8081"
+    networks:
+      - postgres_network
+    mem_limit: 2048M
+    mem_reservation: 256M
+    cpus: '1'
+    environment:
+      - SERVER_PORT=8081
+      - SERVER_ADDRESS=0.0.0.0
 
   app:
-    image: foxlover/java_project_hl:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: sirius_java_project_app
+    image: foxlover/java_project_hl:LAB8
+    container_name: main
     ports:
       - "8080:8080"
     networks:
       - postgres_network
     mem_limit: 2048M
     mem_reservation: 256M
-    cpus: '0.5'
+    cpus: '1'
     environment:
       - SERVER_TOMCAT_MAX_THREADS=200
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://10.60.3.26:5432/sirius_java_bd
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sirius_java_bd
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
-      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_SHOW_SQL=false
 
 networks:
   postgres_network:
