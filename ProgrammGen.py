@@ -81,7 +81,7 @@ class DataGenerator:
                 print(f"Ошибка при получении блюд ресторана {restaurant_id}: {e}")
                 return []
         return self.dishes_cache[restaurant_id]
-    
+
 
     def create_order(self, restaurant_id, max_retries=15, delay=1):
         for attempt in range(max_retries):
@@ -146,7 +146,7 @@ def main():
             return
 
         restaurant_ids = [rest['identifier'] for rest in restaurants]
-        
+
         # Создаем блюда для случайных ресторанов
         for _ in range(args.count):
             restaurant_id = random.choice(restaurant_ids)
@@ -159,7 +159,7 @@ def main():
             return
 
         restaurant_ids = [rest['identifier'] for rest in restaurants]
-        
+
         for _ in range(args.count):
             rest_id = random.choice(restaurant_ids)
             generator.create_order(rest_id)

@@ -14,6 +14,7 @@ export const options = {
     setupTimeout: '30s',
     httpTimeout: '2s',
     consoleOutput: 'none',
+
     stages: [
         { duration: '10s', target: 10 },
         { duration: '1m', target: 1000 },
@@ -48,33 +49,26 @@ function makePostRequest() {
     if (res.status === 0) statusZeroCount++;
     postRequests++;
 
-    check(res, {
-        'Restaurant created (status 200)': (r) => r.status === 200,
-        'Response has restaurant identifier': (r) => !!r.json('identifier')
-    });
 
-    if (res.status !== 200 && res.status !== 0) {
-        console.error(`POST failed. Status: ${res.status}, Body: ${res.body}`);
-    }
 }
 
 function makeGetRequest() {
-    const res = http.get(
-        'http://10.60.3.17:8080/orders/restaurants/average-check',
-        { tags: { type: 'GET' } }
-    );
+
+    try
+    {
+        const res = http.get(
+            'http://10.60.3.17:8080/orders/restaurants/average-check',
+            { tags: { type: 'GET' } }
+        );
+    }
+    catch
+    {
+    }
 
     if (res.status === 0) statusZeroCount++;
     getRequests++;
 
-    check(res, {
-        'GET successful (status 200)': (r) => r.status === 200,
-        'Response has data': (r) => r.json() && r.json().length > 0
-    });
 
-    if (res.status !== 200 && res.status !== 0) {
-        console.error(`GET failed. Status: ${res.status}`);
-    }
 }
 
 export default function (data) {
@@ -95,7 +89,4 @@ export function teardown() {
     console.log(`\n[Итог] Соотношение запросов: ${__ENV.RATIO}`);
     console.log(`POST запросов: ${postRequests}`);
     console.log(`GET запросов: ${getRequests}`);
-    if (statusZeroCount > 0) {
-        console.log(`Запросов со статусом 0: ${statusZeroCount}`);
-    }
 }

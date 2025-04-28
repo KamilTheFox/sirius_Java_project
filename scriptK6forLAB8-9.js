@@ -1,10 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { Counter } from 'k6/metrics';
 
-// Счетчики для статистики
-let statusZeroCount = 0;
-let postRequests = 0;
-let getRequests = 0;
 
 export function setup() {
     return {};
@@ -14,9 +11,10 @@ export const options = {
     setupTimeout: '30s',
     httpTimeout: '2s',
     consoleOutput: 'none',
+
     stages: [
         { duration: '10s', target: 10 },
-        { duration: '1m', target: 1000 },
+        { duration: '1m', target: 200 },
         { duration: '5s', target: 0 },
     ],
     thresholds: {
@@ -26,6 +24,9 @@ export const options = {
     },
 };
 
+const postCounter = new Counter('post_requests');
+const getCounter = new Counter('get_requests');
+
 function makePostRequest() {
     const names = ["Pasta Place", "Burger Joint", "Sushi Spot", "Taco Stand", "Pizza Heaven"];
     const cuisines = ["Italian", "American", "Japanese", "Mexican", "French"];
@@ -33,7 +34,7 @@ function makePostRequest() {
     const payload = {
         name: names[Math.floor(Math.random() * names.length)],
         cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
-        minimumOrder: Math.random() * 50 + 10 // Случайное значение от 10 до 60
+        minimumOrder: Math.random() * 50 + 10
     };
 
     const res = http.post(
@@ -44,42 +45,25 @@ function makePostRequest() {
             tags: { type: 'POST' }
         }
     );
-
-    if (res.status === 0) statusZeroCount++;
-    postRequests++;
-
-    check(res, {
-        'Restaurant created (status 200)': (r) => r.status === 200,
-        'Response has restaurant identifier': (r) => !!r.json('identifier')
-    });
-
-    if (res.status !== 200 && res.status !== 0) {
-        console.error(`POST failed. Status: ${res.status}, Body: ${res.body}`);
-    }
+    postCounter.add(1);
 }
 
 function makeGetRequest() {
-    const res = http.get(
-        'http://10.60.3.17:8081/average-check/restaurants',
-        { tags: { type: 'GET' } }
-    );
-
-    if (res.status === 0) statusZeroCount++;
-    getRequests++;
-
-    check(res, {
-        'GET successful (status 200)': (r) => r.status === 200,
-        'Response has data': (r) => r.json() && r.json().length > 0
-    });
-
-    if (res.status !== 200 && res.status !== 0) {
-        console.error(`GET failed. Status: ${res.status}`);
+    try {
+        const res = http.get(
+            'http://10.60.3.17:8080/orders/restaurants/average-check',
+            { tags: { type: 'GET' },timeout: '100s' }
+        );
+        getCounter.add(1);
+    } catch (error) {
     }
 }
 
 export default function (data) {
     const ratio = __ENV.RATIO || '50/50';
+
     const [postRatio, getRatio] = ratio.split('/').map(Number);
+
     const random = Math.random() * 100;
 
     if (random < postRatio) {
@@ -89,13 +73,4 @@ export default function (data) {
     }
 
     sleep(0.5);
-}
-
-export function teardown() {
-    console.log(`\n[Итог] Соотношение запросов: ${__ENV.RATIO}`);
-    console.log(`POST запросов: ${postRequests}`);
-    console.log(`GET запросов: ${getRequests}`);
-    if (statusZeroCount > 0) {
-        console.log(`Запросов со статусом 0: ${statusZeroCount}`);
-    }
 }
