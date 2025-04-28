@@ -15,7 +15,7 @@ services:
       - SERVER_ADDRESS=0.0.0.0
 
   app:
-    image: foxlover/java_project_hl:LAB8
+    image: foxlover/java_project_hl:KAFKA
     container_name: main
     ports:
       - "8080:8080"
@@ -26,7 +26,7 @@ services:
     cpus: '1'
     environment:
       - SERVER_TOMCAT_MAX_THREADS=200
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sirius_java_bd
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://10.60.3.26:5432/sirius_java_bd
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
