@@ -33,6 +33,19 @@ public class KafkaConsumer {
     @KafkaListener(topics = "${kafka.topic.name}", concurrency = "3")
     public void consume(String message) {
         try {
+            log.debug("Received message: {}", message);
+            KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
+            consumeMain(message);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse Kafka message: {}", message, e);
+        } catch (Exception e) {
+            log.error("Error processing Kafka message: {}", message, e);
+        }
+    }
+
+    private void consumeMain(String message)
+    {
+        try {
             KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
 
             switch (kafkaMessage.getEntity().toUpperCase()) {
@@ -72,7 +85,6 @@ public class KafkaConsumer {
             );
         }
     }
-
     private void handleOrder(KafkaMessage kafkaMessage) throws JsonProcessingException {
         if ("DEL".equals(kafkaMessage.getOperation()))
         {
