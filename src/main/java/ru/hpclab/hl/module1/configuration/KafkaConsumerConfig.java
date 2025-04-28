@@ -1,12 +1,12 @@
 package ru.hpclab.hl.module1.configuration;
 
-import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
 
