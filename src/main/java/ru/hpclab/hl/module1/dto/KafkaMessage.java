@@ -6,5 +6,5 @@ import lombok.Data;
 public class KafkaMessage {
     private String entity;       // RESTAURANT, ORDER, DISH
     private String operation;    // GET, POST
-    private String payload;      // JSON строка с данными
+    private Object payload;      // JSON строка с данными
 }
