@@ -30,8 +30,9 @@ public class KafkaConsumer {
         this.dishService = dishService;
     }
 
-    @KafkaListener(topics = "${kafka.topic.name}", concurrency = "3")
+    @KafkaListener(topics = "${spring.kafka.consumer.group-id}", concurrency = "3")
     public void consume(String message) {
+        System.out.println("Received Message in group foo: " + message);
         try {
             log.debug("Received message: {}", message);
             KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
