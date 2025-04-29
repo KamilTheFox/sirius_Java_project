@@ -32,11 +32,15 @@ public class KafkaConsumer {
         this.dishService = dishService;
     }
 
-    @KafkaListener(id = "batchListener", topics = "var13", containerFactory = "batchFactory")
-    public void consumeBatch(List<KafkaMessage> messages) {
-        for (KafkaMessage message : messages) {
+    @KafkaListener(topics = "var13",
+            groupId = "${spring.kafka.consumer.group-id}",
+            concurrency = "3",
+            containerFactory = "kafkaListenerContainerFactory")
+    public void consume(List<String> messages) {
+        for (String message : messages) {
             try {
-                consumeMain(message);
+                KafkaMessage kafkaMessage = objectMapper.convertValue(message,KafkaMessage.class);
+                consumeMain(kafkaMessage);
             } catch (Exception e) {
                 log.error("Error processing Kafka message: {}", message, e);
             }
