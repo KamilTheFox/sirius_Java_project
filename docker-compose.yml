@@ -34,6 +34,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
       - SPRING_JPA_SHOW_SQL=false
+      - KAFKA_HOSTS: ${KAFKA_HOSTS:-hl22.zil:9094,hl23.zil:9094}
+      - KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-fox}
+      - KAFKA_TOPIC: ${KAFKA_TOPIC:-var13}
+      - KAFKA_CONCURRENCY: ${KAFKA_CONCURRENCY:-2}
 
 networks:
   postgres_network:
