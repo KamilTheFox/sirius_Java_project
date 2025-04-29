@@ -34,10 +34,10 @@ public class KafkaConsumerConfig
                 groupId);
         props.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                KafkaMessage.class);
+                StringDeserializer.class.getName());
         props.put(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                KafkaMessage.class);
+                StringDeserializer.class.getName());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
