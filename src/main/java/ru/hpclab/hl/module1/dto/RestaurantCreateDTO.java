@@ -13,4 +13,11 @@ public class RestaurantCreateDTO
     private String name;
     private String cuisine;
     private double minimumOrder;
+
+    public RestaurantCreateDTO(String name, String cuisine, double minimumOrder)
+    {
+        this.name = name;
+        this.cuisine = cuisine;
+        this.minimumOrder = minimumOrder;
+    }
 }

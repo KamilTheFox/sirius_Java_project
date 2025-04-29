@@ -1,10 +1,11 @@
 package ru.hpclab.hl.module1.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 @Data
 public class KafkaMessage {
-    private String entity;       // RESTAURANT, ORDER, DISH
-    private String operation;    // GET, POST
-    private String payload;      // JSON строка с данными
+    private String entity;
+    private String operation;
+    private Object payload;
 }

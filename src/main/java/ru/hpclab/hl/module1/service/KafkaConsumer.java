@@ -31,36 +31,31 @@ public class KafkaConsumer {
     }
 
     @KafkaListener(topics = "var13", groupId = "${spring.kafka.consumer.group-id}", concurrency = "3")
-    public void consume(String message) {
+    public void consume(KafkaMessage message)
+    {
         System.out.println("Received Message in group foo: " + message);
         try {
-            log.debug("Received message: {}", message);
-            KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
             consumeMain(message);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse Kafka message: {}", message, e);
         } catch (Exception e) {
             log.error("Error processing Kafka message: {}", message, e);
         }
     }
 
-    private void consumeMain(String message)
+    private void consumeMain(KafkaMessage message)
     {
         try {
-            KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
-
-            switch (kafkaMessage.getEntity().toUpperCase()) {
+            switch (message.getEntity().toUpperCase()) {
                 case "RESTAURANT":
-                    handleRestaurant(kafkaMessage);
+                    handleRestaurant(message);
                     break;
                 case "ORDER":
-                    handleOrder(kafkaMessage);
+                    handleOrder(message);
                     break;
                 case "DISH":
-                    handleDish(kafkaMessage);
+                    handleDish(message);
                     break;
                 default:
-                    log.error("Unknown entity type: {}", kafkaMessage.getEntity());
+                    log.error("Unknown entity type: {}", message.getEntity());
             }
         } catch (Exception e) {
             log.error("Error processing message: {}", message, e);
@@ -68,15 +63,13 @@ public class KafkaConsumer {
     }
 
     private void handleDish(KafkaMessage kafkaMessage) throws JsonProcessingException {
-        if ("DEL".equals(kafkaMessage.getOperation()))
-        {
+        if ("DEL".equals(kafkaMessage.getOperation())) {
             dishService.clearAll();
-        }
-        else if ("POST".equals(kafkaMessage.getOperation()))
-        {
-            DishCreateDTO dishDTO = objectMapper.readValue(
+        } else if ("POST".equals(kafkaMessage.getOperation())) {
+            DishCreateDTO dishDTO = objectMapper.convertValue(
                     kafkaMessage.getPayload(),
-                    DishCreateDTO.class);
+                    DishCreateDTO.class
+            );
             dishService.addDish(
                     new Dish(
                             dishDTO.getName(),
@@ -93,9 +86,10 @@ public class KafkaConsumer {
         }
         else if ("POST".equals(kafkaMessage.getOperation()))
         {
-            OrderCreateDTO orderDTO = objectMapper.readValue(
+            OrderCreateDTO orderDTO = objectMapper.convertValue(
                     kafkaMessage.getPayload(),
-                    OrderCreateDTO.class);
+                    OrderCreateDTO.class
+            );
 
             orderService.createOrder(
                     restaurantService.getRestaurantByUUID(orderDTO.getRestaurant()),
@@ -111,9 +105,10 @@ public class KafkaConsumer {
         }
         else if ("POST".equals(message.getOperation()))
         {
-            RestaurantCreateDTO restaurant = objectMapper.readValue(
+            RestaurantCreateDTO restaurant = objectMapper.convertValue(
                     message.getPayload(),
-                    RestaurantCreateDTO.class);
+                    RestaurantCreateDTO.class
+            );
             restaurantService.addRestaurant(
                     new Restaurant(restaurant.getName(),
                     restaurant.getCuisine(),
