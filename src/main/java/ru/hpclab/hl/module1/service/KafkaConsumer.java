@@ -11,6 +11,8 @@ import ru.hpclab.hl.module1.dto.RestaurantCreateDTO;
 import ru.hpclab.hl.module1.model.Dish;
 import ru.hpclab.hl.module1.model.Restaurant;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class KafkaConsumer {
@@ -30,14 +32,14 @@ public class KafkaConsumer {
         this.dishService = dishService;
     }
 
-    @KafkaListener(topics = "var13", groupId = "${spring.kafka.consumer.group-id}", concurrency = "3")
-    public void consume(KafkaMessage message)
-    {
-        System.out.println("Received Message in group foo: " + message);
-        try {
-            consumeMain(message);
-        } catch (Exception e) {
-            log.error("Error processing Kafka message: {}", message, e);
+    @KafkaListener(id = "batchListener", topics = "var13", containerFactory = "batchFactory")
+    public void consumeBatch(List<KafkaMessage> messages) {
+        for (KafkaMessage message : messages) {
+            try {
+                consumeMain(message);
+            } catch (Exception e) {
+                log.error("Error processing Kafka message: {}", message, e);
+            }
         }
     }
 

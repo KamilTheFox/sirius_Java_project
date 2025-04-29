@@ -1,10 +1,16 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Counter } from 'k6/metrics';
+import kafka from 'k6/x/kafka'   // Нужно установить расширение k6-kafka
 
-
+// В setup создаем producer
 export function setup() {
-    return {};
+    const kafkaConfig = {
+        brokers: ['hl22.zil:9092'],
+        clientID: 'k6-load-test',
+        topic: 'var13'
+    };
+    return { kafkaConfig };
 }
 
 export const options = {
@@ -31,20 +37,28 @@ function makePostRequest() {
     const names = ["Pasta Place", "Burger Joint", "Sushi Spot", "Taco Stand", "Pizza Heaven"];
     const cuisines = ["Italian", "American", "Japanese", "Mexican", "French"];
 
-    const payload = {
+    // Создаем payload для ресторана
+    const restaurantPayload = {
         name: names[Math.floor(Math.random() * names.length)],
         cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
         minimumOrder: Math.random() * 50 + 10
     };
 
-    const res = http.post(
-        'http://10.60.3.17:8080/restaurants',
-        JSON.stringify(payload),
-        {
-            headers: { 'Content-Type': 'application/json' },
-            tags: { type: 'POST' }
-        }
-    );
+    // Формируем Kafka сообщение
+    const kafkaMessage = {
+        entity: "RESTAURANT",
+        operation: "POST",
+        payload: restaurantPayload
+    };
+
+    // Отправляем сообщение в Kafka
+    const producer = new kafka.Writer(data.kafkaConfig);
+    producer.produce({
+        topic: data.kafkaConfig.topic,
+        value: JSON.stringify(kafkaMessage)
+    });
+    producer.close();
+
     postCounter.add(1);
 }
 
