@@ -39,8 +39,10 @@ public class KafkaConsumer {
     public void consume(List<String> messages) {
         for (String message : messages) {
             try {
-                KafkaMessage kafkaMessage = objectMapper.convertValue(message,KafkaMessage.class);
+                KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
                 consumeMain(kafkaMessage);
+            } catch (JsonProcessingException e) {
+                log.error("Error parsing Kafka message: {}", message, e);
             } catch (Exception e) {
                 log.error("Error processing Kafka message: {}", message, e);
             }
