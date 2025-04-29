@@ -1,16 +1,22 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Counter } from 'k6/metrics';
-import kafka from 'k6/x/kafka'   // Нужно установить расширение k6-kafka
+import { Writer, SCHEMA_TYPE_STRING, SchemaRegistry } from 'k6/x/kafka';
+import { randomString } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
-// В setup создаем producer
+// Глобальная конфигурация Kafka
+const brokers = ['hl22.zil:9094'];
+const topic = 'var13';
+
+const writer = new Writer({
+    brokers: brokers,
+    topic: topic,
+});
+
+const schemaRegistry = new SchemaRegistry();
+
 export function setup() {
-    const kafkaConfig = {
-        brokers: ['hl22.zil:9092'],
-        clientID: 'k6-load-test',
-        topic: 'var13'
-    };
-    return { kafkaConfig };
+    return {};
 }
 
 export const options = {
@@ -20,7 +26,7 @@ export const options = {
 
     stages: [
         { duration: '10s', target: 10 },
-        { duration: '1m', target: 10 },
+        { duration: '1m', target: 50 },
         { duration: '5s', target: 0 },
     ],
     thresholds: {
@@ -51,22 +57,34 @@ function makePostRequest() {
         payload: restaurantPayload
     };
 
-    // Отправляем сообщение в Kafka
-    const producer = new kafka.Writer(data.kafkaConfig);
-    producer.produce({
-        topic: data.kafkaConfig.topic,
-        value: JSON.stringify(kafkaMessage)
+    // Отправляем сообщение в Kafka используя новый метод
+    writer.produce({
+        messages: [
+            {
+                key: schemaRegistry.serialize({
+                    data: randomString(4),
+                    schemaType: SCHEMA_TYPE_STRING,
+                }),
+                value: schemaRegistry.serialize({
+                    data: JSON.stringify(kafkaMessage),
+                    schemaType: SCHEMA_TYPE_STRING,
+                }),
+            },
+        ],
     });
-    producer.close();
 
     postCounter.add(1);
+}
+
+export function teardown() {
+    writer.close();
 }
 
 function makeGetRequest() {
     try {
         const res = http.get(
             'http://10.60.3.17:8080/orders/restaurants/average-check',
-            { tags: { type: 'GET' },timeout: '100s' }
+            { tags: { type: 'GET' }, timeout: '100s' }
         );
         getCounter.add(1);
     } catch (error) {
@@ -81,10 +99,9 @@ export default function (data) {
     const random = Math.random() * 100;
 
     if (random < postRatio) {
-        makePostRequest();
+      makePostRequest();
     } else {
         makeGetRequest();
     }
-
-    sleep(0.5);
+    sleep(0.05);
 }

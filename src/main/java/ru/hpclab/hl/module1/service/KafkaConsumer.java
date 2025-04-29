@@ -12,6 +12,7 @@ import ru.hpclab.hl.module1.model.Dish;
 import ru.hpclab.hl.module1.model.Restaurant;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -32,6 +33,8 @@ public class KafkaConsumer {
         this.dishService = dishService;
     }
 
+    private final AtomicInteger messageCounter = new AtomicInteger(0);
+
     @KafkaListener(topics = "var13",
             groupId = "${spring.kafka.consumer.group-id}",
             concurrency = "3",
@@ -39,7 +42,14 @@ public class KafkaConsumer {
     public void consume(List<String> messages) {
         for (String message : messages) {
             try {
+                int currentCount = messageCounter.incrementAndGet();
                 KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
+
+                if (currentCount % 500 == 0) {
+                    log.info("500th message reached! Count: {}, Message: {}",
+                            currentCount, message);
+                }
+
                 consumeMain(kafkaMessage);
             } catch (JsonProcessingException e) {
                 log.error("Error parsing Kafka message: {}", message, e);
