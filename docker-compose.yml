@@ -15,6 +15,9 @@ services:
       - SERVER_ADDRESS=0.0.0.0
 
   app:
+    extra_hosts:
+      - "hl22.zil:127.0.0.2"
+      - "hl23.zil:127.0.0.3"
     image: foxlover/java_project_hl:KAFKA
     container_name: main
     ports:
