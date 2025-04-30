@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
+  DB_HOST: "10.60.3.26"
+  DB_PORT: "5432"
   SERVER_TOMCAT_MAX_THREADS: "200"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
   SPRING_JPA_SHOW_SQL: "false"
