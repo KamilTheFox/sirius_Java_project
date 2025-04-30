@@ -1,6 +1,9 @@
 package ru.hpclab.hl.module1.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import ru.hpclab.hl.module1.dto.DishCreateDTO;
@@ -10,6 +13,7 @@ import ru.hpclab.hl.module1.dto.OrderCreateDTO;
 import ru.hpclab.hl.module1.dto.RestaurantCreateDTO;
 import ru.hpclab.hl.module1.model.Dish;
 import ru.hpclab.hl.module1.model.Restaurant;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,21 +37,21 @@ public class KafkaConsumer {
         this.dishService = dishService;
     }
 
-    private final AtomicInteger messageCounter = new AtomicInteger(0);
-
     @KafkaListener(topics = "var13",
             groupId = "${spring.kafka.consumer.group-id}",
             concurrency = "3",
             containerFactory = "kafkaListenerContainerFactory")
-    public void consume(List<String> messages) {
-        for (String message : messages) {
+    public void consume(@Payload List<String> messages,
+                        @Header(KafkaHeaders.OFFSET) List<Long> offsets) {
+        for (int i = 0; i < messages.size(); i++) {
+            long offset = offsets.get(i);
+            String message = messages.get(i);
             try {
-                int currentCount = messageCounter.incrementAndGet();
                 KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
 
-                if (currentCount % 500 == 0) {
+                if (offset % 500 == 0) {
                     log.info("500th message reached! Count: {}, Message: {}",
-                            currentCount, message);
+                            offset, message);
                 }
 
                 consumeMain(kafkaMessage);

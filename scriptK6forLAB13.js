@@ -26,7 +26,7 @@ export const options = {
 
     stages: [
         { duration: '10s', target: 10 },
-        { duration: '1m', target: 50 },
+        { duration: '1m', target: 10 },
         { duration: '5s', target: 0 },
     ],
     thresholds: {
@@ -83,7 +83,7 @@ export function teardown() {
 function makeGetRequest() {
     try {
         const res = http.get(
-            'http://10.60.3.17:8080/orders/restaurants/average-check',
+            'http://10.60.3.17:8081/orders/restaurants/average-check',
             { tags: { type: 'GET' }, timeout: '100s' }
         );
         getCounter.add(1);
@@ -95,12 +95,11 @@ export default function (data) {
     const ratio = __ENV.RATIO || '50/50';
 
     const [postRatio, getRatio] = ratio.split('/').map(Number);
-
-    const random = Math.random() * 100;
-
-    if (random < postRatio) {
+    for (let i = 0; i < postRatio; i++) {
       makePostRequest();
-    } else {
+    }
+    for (let i = 0; i < getRatio; i++)
+    {
         makeGetRequest();
     }
     sleep(0.05);
