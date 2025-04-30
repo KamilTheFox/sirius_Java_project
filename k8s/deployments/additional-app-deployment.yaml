@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: additional
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: additional
+  template:
+    metadata:
+      labels:
+        app: additional
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+      containers:
+        - name: additional
+          image: foxlover/java_project_hl:LAB9_ADD
+          ports:
+            - containerPort: 8081
+          resources:
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"

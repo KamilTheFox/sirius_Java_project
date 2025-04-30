@@ -2,14 +2,14 @@ name: Docker Build and Push
 
 on:
   push:
-    branches: [ "KAFKA" ]
+    branches: [ "LAB14" ]
   pull_request:
-    branches: [ "KAFKA" ]
+    branches: [ "LAB14" ]
 
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/java_project_hl
-  TAG: KAFKA
+  TAG: LAB14
 
 jobs:
   build-and-push:

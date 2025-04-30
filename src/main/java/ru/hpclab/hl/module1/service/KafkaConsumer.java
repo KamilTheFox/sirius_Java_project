@@ -48,12 +48,11 @@ public class KafkaConsumer {
             String message = messages.get(i);
             try {
                 KafkaMessage kafkaMessage = objectMapper.readValue(message, KafkaMessage.class);
-
-                if (offset % 500 == 0) {
+                if (offset % 500 == 0)
+                {
                     log.info("500th message reached! Count: {}, Message: {}",
                             offset, message);
                 }
-
                 consumeMain(kafkaMessage);
             } catch (JsonProcessingException e) {
                 log.error("Error parsing Kafka message: {}", message, e);
