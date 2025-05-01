@@ -4,11 +4,10 @@ metadata:
   name: app-config
   namespace: var13
 data:
-  DB_HOST: "10.60.3.26"
+  DB_HOST: "host.minikube.internal"
   DB_PORT: "5432"
   POSTGRES_DB: "sirius_java_bd"
   POSTGRES_USER: "postgres"
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://host.minikube.internal:5432/museum"
   SPRING_DATASOURCE_USERNAME: "postgres"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
   SPRING_JPA_SHOW_SQL: "false"
