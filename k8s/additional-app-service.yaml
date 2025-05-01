@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: additional-service
+  name: additional
+  namespace: var13
 spec:
   type: NodePort
   selector:

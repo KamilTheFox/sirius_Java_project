@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: var13
+data:
+  DB_HOST: "10.60.3.26"
+  DB_PORT: "5432"
+  POSTGRES_DB: "sirius_java_bd"
+  POSTGRES_USER: "postgres"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://host.minikube.internal:5432/museum"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  SPRING_JPA_SHOW_SQL: "false"
+  KAFKA_HOSTS: "10.60.3.27,10.60.3.28"
+  TOMCAT_THREADS_MAX: "200"
+  TOMCAT_THREADS_MIN_SPARE: "10"
+  SERVER_ADDRESS: "0.0.0.0"

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: main
+  namespace: var13
 spec:
   replicas: 1
   selector:
@@ -12,8 +13,6 @@ spec:
       labels:
         app: main
     spec:
-      imagePullSecrets:
-        - name: dockerhub-secret
       containers:
         - name: main
           image: foxlover/java_project_hl:LAB14
