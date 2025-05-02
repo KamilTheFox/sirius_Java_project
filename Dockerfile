@@ -10,7 +10,7 @@ COPY <<'EOF' /app/check-dishes.sh
 #!/bin/sh
 while true; do
     echo "Fetching dishes..."
-    curl -s http://localhost:30113/dishes
+    curl -s http://main.var13.svc.cluster.local:8080/dishes
     echo "\n-------------------"
     sleep 10
 done
