@@ -1,30 +1,18 @@
-# Этап сборки
-FROM gradle:latest AS builder
+FROM alpine:latest
+
+RUN apk add --no-cache curl
 
 WORKDIR /app
 
-# Копируем сначала только файлы для зависимостей
-COPY settings.gradle build.gradle ./
-COPY gradle gradle
-COPY gradlew ./
+# Создаем скрипт
+RUN echo '#!/bin/sh\n\
+while true; do\n\
+    echo "Fetching dishes..."\n\
+    curl -s http://localhost:30113/dishes\n\
+    echo "\n-------------------"\n\
+    sleep 5\n\
+done' > /app/check-dishes.sh
 
-# Загружаем зависимости отдельно (это улучшит кэширование)
-RUN gradle dependencies --no-daemon
+RUN chmod +x /app/check-dishes.sh
 
-# Теперь копируем исходный код
-COPY src src
-
-# Собираем проект
-RUN gradle build -x test --no-daemon --warning-mode all
-
-# Финальный этап
-FROM openjdk:21-jdk-slim
-
-WORKDIR /app
-
-# Копируем jar из первого этапа
-COPY --from=builder /app/build/libs/*.jar app.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["/app/check-dishes.sh"]

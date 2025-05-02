@@ -2,14 +2,14 @@ name: Docker Build and Push
 
 on:
   push:
-    branches: [ "LAB15" ]
+    branches: [ "LAB15ADD" ]
   pull_request:
-    branches: [ "LAB15" ]
+    branches: [ "LAB15ADD" ]
 
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/java_project_hl
-  TAG: LAB15
+  TAG: LAB15ADD
 
 jobs:
   build-and-push:
