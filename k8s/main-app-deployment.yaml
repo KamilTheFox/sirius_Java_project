@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: foxlover/java_project_hl:LAB14
+          image: foxlover/java_project_hl:LAB15
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
