@@ -4,7 +4,7 @@ metadata:
   name: app-config
   namespace: var13
 data:
-  DB_HOST: "host.minikube.internal"
+  DB_HOST: "10.60.3.26"
   DB_PORT: "5432"
   POSTGRES_DB: "sirius_java_bd"
   POSTGRES_USER: "postgres"
