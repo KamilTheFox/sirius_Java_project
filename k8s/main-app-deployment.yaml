@@ -15,7 +15,19 @@ spec:
     spec:
       containers:
         - name: main
-          image: foxlover/java_project_hl:LAB15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          image: foxlover/java_project_hl:LAB17
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
